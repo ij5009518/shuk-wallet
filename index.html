@@ -181,6 +181,7 @@
       <button data-go="card"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>Card</button>
       <button data-go="bank"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>Banking</button>
       <button data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l-4 4 4 4M3 14h12M17 14l4-4-4-4M21 10H9"/></svg>Move money</button>
+      <button data-go="drops"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Moov Drops</button>
       <button data-go="account"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Account</button>
     </nav>
     <div class="spacer"></div>
@@ -351,6 +352,51 @@
           </div>
         </div>
       </section>
+
+      <!-- MOOV DROPS -->
+      <section class="view" id="v-drops" hidden>
+        <p class="note" style="margin:0 0 16px">Every pre-built Moov Drop, embedded and themed to match Shuk. Dialog Drops open in an overlay you can close; inline Drops render in place.</p>
+        <div class="home">
+          <div class="col">
+            <div class="block">
+              <h3>Onboarding</h3>
+              <p class="note" style="margin-top:0">Identity &amp; business verification (KYC) for wallet, send, collect and card-issuing.</p>
+              <div class="btnrow" style="margin-top:10px"><button class="btn pri" data-drop="onboard">Launch onboarding</button></div>
+            </div>
+            <div class="block">
+              <h3>Payment methods</h3>
+              <p class="note" style="margin-top:0">Link &amp; manage the user’s bank accounts and cards in one dialog.</p>
+              <div class="btnrow" style="margin-top:10px"><button class="btn pri" data-drop="bank">Launch payment methods</button></div>
+            </div>
+            <div class="block">
+              <h3>File upload</h3>
+              <p class="note" style="margin-top:0">Securely upload verification documents to the Moov account.</p>
+              <div class="btnrow" style="margin-top:10px"><button class="btn pri" data-drop="fileupload">Launch file upload</button></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="block">
+              <h3>Card link</h3>
+              <p class="note" style="margin-top:0">Securely register a debit/credit card (PCI-handled by Moov).</p>
+              <div class="btnrow" style="margin-top:10px"><button class="btn sub" data-act="goCardlink">Open card link</button></div>
+            </div>
+            <div class="block">
+              <h3>Issued card</h3>
+              <p class="note" style="margin-top:0">Securely reveal a Moov-issued card’s full details.</p>
+              <div class="btnrow" style="margin-top:10px"><button class="btn sub" data-act="goIssued">Reveal issued card</button></div>
+            </div>
+            <div class="block">
+              <h3>Terms of service</h3>
+              <p class="note" style="margin-top:0">Review Moov’s privacy policy &amp; terms; generates an agreement token to patch to the account.</p>
+              <div id="tosBox" hidden style="margin-top:12px">
+                <moov-terms-of-service id="d-tos"></moov-terms-of-service>
+                <div class="btnrow"><button class="btn dark" data-act="acceptTos">Accept &amp; continue</button></div>
+              </div>
+              <div class="btnrow" style="margin-top:10px"><button class="btn sub" data-drop="tos">Show terms of service</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <div class="mobnav">
@@ -358,6 +404,7 @@
       <button data-go="card"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>Card</button>
       <button data-go="bank"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>Bank</button>
       <button data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l-4 4 4 4M3 14h12M17 14l4-4-4-4M21 10H9"/></svg>Move</button>
+      <button data-go="drops"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Drops</button>
       <button data-go="account"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Account</button>
     </div>
   </div>
@@ -369,13 +416,14 @@
 <moov-onboarding id="d-onboard"></moov-onboarding>
 <moov-payment-methods id="d-pm"></moov-payment-methods>
 <moov-issued-card id="d-issued" hidden></moov-issued-card>
+<moov-file-upload id="d-fileupload"></moov-file-upload>
 
 <div class="toast" id="toast"></div>
 
 <script>
   const state = { token:"", acct:"", card:"", frozen:false };
   const $ = (id) => document.getElementById(id);
-  const titles = { home:"Home", card:"Card", bank:"Banking", move:"Move money", account:"Account" };
+  const titles = { home:"Home", card:"Card", bank:"Banking", move:"Move money", drops:"Moov Drops", account:"Account" };
   let clerkActive = false, connectStarted = false;
   function moovReady(){ return window.customElements && window.customElements.get("moov-onboarding"); }
   function toast(m){ const t=$("toast"); t.textContent=m; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",3600); }
@@ -461,11 +509,15 @@
 
     const ic=$("d-issued"); ic.oauthToken=state.token; ic.accountID=state.acct; if(state.card) ic.issuedCardID=state.card;
     const cl=$("d-cardlink"); if(cl){ cl.oauthToken=state.token; cl.accountID=state.acct; cl.onSuccess=()=>toast("Card saved."); cl.onError=(c,a)=>toast("Card error: "+(c||(a&&a.error)||"")); }
+
+    const fu=$("d-fileupload"); if(fu){ fu.token=state.token; fu.accountID=state.acct; fu.onSuccess=()=>{ closeDrops(); toast("File uploaded to Moov."); }; fu.onCancel=()=>closeDrops(); fu.onError=(e)=>toast("Upload error: "+((e&&e.message)||e)); }
+
+    const tos=$("d-tos"); if(tos){ tos.token=state.token; tos.textColor="rgb(59,61,73)"; tos.linkColor="rgb(74,92,245)"; tos.backgroundColor="rgb(255,255,255)"; tos.fontSize="13px"; tos.onTermsOfServiceTokenReady=(t)=>{ window._tosToken=(t&&t.token)||t; toast("Terms agreement token generated."); }; tos.onTermsOfServiceTokenError=(e)=>toast("Terms error: "+((e&&e.message)||e)); }
   }
   function needConn(){ if(!state.token||!state.acct){ toast("Still connecting to Moov…"); return true; } return false; }
 
   function showChrome(){ $("backdrop").style.display="block"; $("dropClose").style.display="flex"; }
-  function closeDrops(){ ["d-onboard","d-pm","d-issued"].forEach(id=>{ const el=$(id); if(el) try{ el.open=false; }catch(e){} }); $("backdrop").style.display="none"; $("dropClose").style.display="none"; }
+  function closeDrops(){ ["d-onboard","d-pm","d-issued","d-fileupload"].forEach(id=>{ const el=$(id); if(el) try{ el.open=false; }catch(e){} }); $("backdrop").style.display="none"; $("dropClose").style.display="none"; }
   $("dropClose").addEventListener("click", closeDrops);
   $("backdrop").addEventListener("click", closeDrops);
   document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeDrops(); });
@@ -485,6 +537,8 @@
       else if(k==="addmoney"){ if(needConn())return; const pm=$("d-pm"); pm.paymentMethodTypes=["bankAccount"]; pm.open=true; showChrome(); }
       else if(k==="issued"){ if(needConn())return; const box=$("issuedBox"), ic=$("d-issued"); ic.hidden=false; box.innerHTML=""; box.appendChild(ic); if(!state.card) toast("Add an issued-card ID in Developer to load real details."); }
       else if(k==="cardlink"){ if(needConn())return; go("move"); $("cardlinkWrap").hidden=false; }
+      else if(k==="fileupload"){ if(needConn())return; $("d-fileupload").open=true; showChrome(); }
+      else if(k==="tos"){ if(needConn())return; $("tosBox").hidden=false; }
       return;
     }
     const nav=e.target.closest("[data-go]"); if(nav){ go(nav.getAttribute("data-go")); return; }
@@ -495,8 +549,11 @@
       if(a==="freeze"){ state.frozen=!state.frozen; $("homeCard").classList.toggle("frozen",state.frozen); $("cardCard").classList.toggle("frozen",state.frozen); $("freezeBtn").textContent=state.frozen?"Unfreeze card":"Freeze card"; toast(state.frozen?"Card frozen — purchases declined.":"Card unfrozen."); }
       else if(a==="applepay") toast("In a live build this adds your card to the device wallet via Moov.");
       else if(a==="replace") toast("Replacement requested — a new card would be issued via Moov.");
-      else if(a==="send") toast("Peer send runs on Moov rails. Connect a recipient to enable.");
-      else if(a==="request") toast("A payment request link would be generated via Moov.");
+      else if(a==="send"){ toast("Sending money uses Moov’s Transfers API — there’s no pre-built Drop for it. Link a funding source first."); const pm=$("d-pm"); if(state.token&&state.acct){ pm.paymentMethodTypes=["bankAccount","card"]; pm.open=true; showChrome(); } }
+      else if(a==="request") toast("Requesting money uses Moov Payment Links (a hosted page), not a Drop. See the Moov Drops tab for the real Drops.");
+      else if(a==="goCardlink"){ go("move"); $("cardlinkWrap").hidden=false; }
+      else if(a==="goIssued"){ go("card"); const box=$("issuedBox"), ic=$("d-issued"); ic.hidden=false; box.innerHTML=""; box.appendChild(ic); if(!state.card) toast("Add an issued-card ID in Developer to load real details."); }
+      else if(a==="acceptTos"){ if(window._tosToken) toast("Terms accepted — agreement token ready to patch to the account."); else toast("Review the terms above first."); }
       else if(a==="settings") go("account");
       else if(a==="signout") signOut();
       else if(a==="hidecardlink") $("cardlinkWrap").hidden=true;
