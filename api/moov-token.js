@@ -1,5 +1,7 @@
 // Vercel serverless function: mints a short-lived Moov access token.
 // Secret keys live only here (env vars), never in the browser.
+// If CLERK_SECRET_KEY is set, the caller must present a valid Clerk session
+// (Authorization: Bearer <token>) — so only signed-in users get a token.
 // Pass { accountId } in the body to also scope to a newly-onboarded account.
 export default async function handler(req, res) {
   const pub = process.env.MOOV_PUBLIC_KEY;
@@ -8,6 +10,20 @@ export default async function handler(req, res) {
 
   if (!pub || !priv || !facilitator) {
     return res.status(200).json({ needsKeys: true });
+  }
+
+  // ---- Require a valid Clerk session when auth is configured ----
+  const clerkSecret = process.env.CLERK_SECRET_KEY;
+  if (clerkSecret) {
+    const auth = req.headers.authorization || "";
+    const tok = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+    if (!tok) return res.status(401).json({ error: "Sign in required." });
+    try {
+      const { verifyToken } = await import("@clerk/backend");
+      await verifyToken(tok, { secretKey: clerkSecret });
+    } catch (e) {
+      return res.status(401).json({ error: "Invalid or expired session." });
+    }
   }
 
   let body = {};
