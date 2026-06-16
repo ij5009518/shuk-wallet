@@ -1,35 +1,28 @@
 // Vercel serverless function: mints a short-lived Moov access token.
 // Secret keys live only here (env vars), never in the browser.
+// Pass { accountId } in the body to also scope to a newly-onboarded account.
 export default async function handler(req, res) {
   const pub = process.env.MOOV_PUBLIC_KEY;
   const priv = process.env.MOOV_PRIVATE_KEY;
-  const accountId = process.env.MOOV_ACCOUNT_ID;
+  const facilitator = process.env.MOOV_ACCOUNT_ID;
 
-  if (!pub || !priv || !accountId) {
+  if (!pub || !priv || !facilitator) {
     return res.status(200).json({ needsKeys: true });
   }
 
-  const origin = req.headers.origin || `https://${req.headers.host || ""}`;
-  const a = accountId;
-  const scope = [
-    "/accounts.write",
-    `/accounts/${a}/profile.read`,
-    `/accounts/${a}/profile.write`,
-    `/accounts/${a}/cards.read`,
-    `/accounts/${a}/cards.write`,
-    `/accounts/${a}/bank-accounts.read`,
-    `/accounts/${a}/bank-accounts.write`,
-    `/accounts/${a}/capabilities.read`,
-    `/accounts/${a}/capabilities.write`,
-    `/accounts/${a}/representatives.read`,
-    `/accounts/${a}/representatives.write`,
-    `/accounts/${a}/files.read`,
-    `/accounts/${a}/files.write`,
-    `/accounts/${a}/issued-cards.read`,
-    "/fed.read",
-    "/profile-enrichment.read",
-  ].join(" ");
+  let body = {};
+  try { body = typeof req.body === "object" && req.body ? req.body : JSON.parse(req.body || "{}"); } catch {}
+  const target = body && body.accountId;
 
+  const fullFor = (a) =>
+    ["bank-accounts", "capabilities", "cards", "profile", "representatives", "files"]
+      .flatMap((x) => [`/accounts/${a}/${x}.read`, `/accounts/${a}/${x}.write`])
+      .concat([`/accounts/${a}/issued-cards.read`]);
+
+  let scopes = ["/accounts.write", "/fed.read", "/profile-enrichment.read"].concat(fullFor(facilitator));
+  if (target && target !== facilitator) scopes = scopes.concat(fullFor(target));
+
+  const origin = req.headers.origin || `https://${req.headers.host || ""}`;
   try {
     const r = await fetch("https://api.moov.io/oauth2/token", {
       method: "POST",
@@ -38,11 +31,11 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
         Origin: origin,
       },
-      body: JSON.stringify({ grant_type: "client_credentials", scope }),
+      body: JSON.stringify({ grant_type: "client_credentials", scope: scopes.join(" ") }),
     });
     const data = await r.json().catch(() => ({}));
     if (!r.ok) return res.status(502).json({ error: data || `status ${r.status}` });
-    return res.status(200).json({ token: data.access_token, accountId });
+    return res.status(200).json({ token: data.access_token, accountId: facilitator });
   } catch (e) {
     return res.status(500).json({ error: String((e && e.message) || e) });
   }
