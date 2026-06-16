@@ -29,6 +29,8 @@
   .auth .go { width: 100%; border: none; background: var(--accent); color: #fff; padding: 13px 0; border-radius: 11px; font-weight: 700; font-size: 15px; }
   .auth .go:hover { background: var(--accent2); }
   .auth .fine { font-size: 11.5px; color: var(--faint); margin-top: 16px; line-height: 1.6; }
+  #clerkSignIn { display: none; }
+  #clerkSignIn .cl-rootBox, #clerkSignIn .cl-card { box-shadow: 0 30px 70px -30px rgba(0,0,0,.6) !important; }
   .mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg,var(--accent),#7b88ff); display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px; flex: none; }
 
   /* ---------- Shell ---------- */
@@ -43,7 +45,8 @@
   .side .spacer { flex: 1; }
   .userchip { border-top: 1px solid var(--line); padding-top: 14px; }
   .userchip .who { display: flex; align-items: center; gap: 10px; padding: 4px 8px; }
-  .userchip .av { width: 34px; height: 34px; border-radius: 50%; background: var(--surface2); display: grid; place-items: center; font-weight: 700; font-size: 13px; color: #3b3d49; flex: none; }
+  .userchip .av { width: 34px; height: 34px; border-radius: 50%; background: var(--surface2); display: grid; place-items: center; font-weight: 700; font-size: 13px; color: #3b3d49; flex: none; overflow: hidden; }
+  .userchip .av img { width: 100%; height: 100%; object-fit: cover; }
   .userchip .nm { font-size: 13.5px; font-weight: 700; line-height: 1.2; }
   .userchip .em { font-size: 11.5px; color: var(--faint); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
   .userchip .out { margin-top: 8px; width: 100%; display: flex; align-items: center; gap: 9px; background: none; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
@@ -94,7 +97,6 @@
 
   .block { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
   .block h3 { font-size: 14px; font-weight: 700; margin: 0 0 14px; }
-  .sec { font-size: 13px; font-weight: 700; color: #3b3d49; margin: 4px 0 12px; }
 
   .list { display: flex; flex-direction: column; gap: 8px; }
   .row { display: flex; align-items: center; gap: 13px; padding: 11px 4px; border-bottom: 1px solid var(--line); }
@@ -122,9 +124,7 @@
   .btn.block { width: 100%; }
   .note { font-size: 12px; color: var(--muted); line-height: 1.65; margin-top: 14px; }
   .moovbox { margin-top: 16px; border: 1px solid var(--line); border-radius: 14px; padding: 12px; min-height: 56px; background: var(--surface); }
-  .ptitle { display: none; }
 
-  /* ---------- Drop modal chrome ---------- */
   #backdrop { position: fixed; inset: 0; background: rgba(11,14,22,.45); z-index: 2147482000; display: none; }
   #dropClose { position: fixed; top: 20px; right: 24px; z-index: 2147483600; display: none; align-items: center; gap: 8px;
     background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 10px 16px; font-size: 13.5px; font-weight: 700; box-shadow: 0 10px 28px -8px rgba(0,0,0,.4); }
@@ -133,7 +133,6 @@
 
   .toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 12px; font-size: 13.5px; max-width: 420px; box-shadow: 0 16px 34px -10px rgba(0,0,0,.5); display: none; z-index: 2147483647; text-align: center; }
 
-  /* ---------- Mobile fallback nav ---------- */
   .mobnav { display: none; }
   @media (max-width: 880px) {
     aside.side { display: none; }
@@ -161,15 +160,16 @@
 </style>
 
 <!-- ===== Sign-in gate ===== -->
-<div class="auth" id="auth">
-  <div class="box">
+<div class="auth" id="auth" style="display:none">
+  <div class="box" id="demoBox" style="display:none">
     <div class="brand"><span class="mark">S</span><span>Shuk</span></div>
     <p>Your money, your card, your bank — in one place.</p>
     <label for="signinEmail">Email</label>
     <input id="signinEmail" type="email" placeholder="you@email.com" autocomplete="username" />
     <button class="go" id="signinBtn">Sign in</button>
-    <p class="fine">Demo wallet on Moov’s sandbox. No real funds move. Identity, banking and card issuing are provided by Moov Financial.</p>
+    <p class="fine">Demo mode (Clerk not configured). Add your Clerk keys in Vercel to enable real sign-in.</p>
   </div>
+  <div id="clerkSignIn"></div>
 </div>
 
 <!-- ===== App ===== -->
@@ -185,7 +185,7 @@
     </nav>
     <div class="spacer"></div>
     <div class="userchip">
-      <div class="who"><div class="av" id="avatar">IJ</div><div><div class="nm" id="sideName">Isaac Joseph</div><div class="em" id="sideEmail">—</div></div></div>
+      <div class="who"><div class="av" id="avatar">IJ</div><div><div class="nm" id="sideName">Member</div><div class="em" id="sideEmail">—</div></div></div>
       <button class="out" id="signoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign out</button>
     </div>
   </aside>
@@ -218,7 +218,7 @@
               <div class="label">Available balance</div>
               <div class="bal">$4,820.50</div>
               <div class="num">•••• &nbsp;•••• &nbsp;•••• &nbsp;7842</div>
-              <div class="foot"><span class="cardName">ISAAC JOSEPH</span><span>09 / 29</span></div>
+              <div class="foot"><span class="cardName">MEMBER</span><span>09 / 29</span></div>
             </div>
             <div class="actions">
               <button class="act" data-drop="addmoney"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="t">Add money</span></button>
@@ -256,7 +256,7 @@
               <span class="froztag">FROZEN</span>
               <div class="top"><span class="nm">Shuk · Debit</span><span class="brandmark">VISA</span></div>
               <div class="num" style="margin-top:40px">•••• &nbsp;•••• &nbsp;•••• &nbsp;7842</div>
-              <div class="foot"><span class="cardName">ISAAC JOSEPH</span><span>09 / 29 · CVV •••</span></div>
+              <div class="foot"><span class="cardName">MEMBER</span><span>09 / 29 · CVV •••</span></div>
             </div>
             <div class="moovbox" id="issuedBox"><div class="note" style="margin:0">Full card details render inside a secure Moov iframe. Add an issued-card ID in Developer, then reveal.</div></div>
           </div>
@@ -332,7 +332,7 @@
           <div class="col">
             <div class="block">
               <h3>Profile</h3>
-              <div class="kv"><span class="k">Name</span><span class="v" id="accName" style="font-variant-numeric:normal">Isaac Joseph</span></div>
+              <div class="kv"><span class="k">Name</span><span class="v" id="accName" style="font-variant-numeric:normal">Member</span></div>
               <div class="kv"><span class="k">Email</span><span class="v" id="accEmail" style="font-variant-numeric:normal;font-weight:500">—</span></div>
               <div class="kv"><span class="k">Identity (KYC)</span><span class="v" id="kyc" style="font-variant-numeric:normal;color:#92660a">Unverified</span></div>
             </div>
@@ -363,11 +363,9 @@
   </div>
 </div>
 
-<!-- Drop chrome -->
 <div id="backdrop"></div>
 <button id="dropClose"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Close</button>
 
-<!-- Moov Drops -->
 <moov-onboarding id="d-onboard"></moov-onboarding>
 <moov-payment-methods id="d-pm"></moov-payment-methods>
 <moov-issued-card id="d-issued" hidden></moov-issued-card>
@@ -378,29 +376,71 @@
   const state = { token:"", acct:"", card:"", frozen:false };
   const $ = (id) => document.getElementById(id);
   const titles = { home:"Home", card:"Card", bank:"Banking", move:"Move money", account:"Account" };
+  let clerkActive = false, connectStarted = false;
   function moovReady(){ return window.customElements && window.customElements.get("moov-onboarding"); }
   function toast(m){ const t=$("toast"); t.textContent=m; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",3600); }
   function setConnected(on,msg){ $("dot").className="dot"+(on?" on":""); $("statusText").textContent=msg; if(on){ $("kyc").textContent="Verified"; $("kyc").style.color="#15803d"; } }
-
-  /* ---- Auth ---- */
   function deriveName(email){ const p=(email||"").split("@")[0].replace(/[._]/g," ").trim(); if(!p) return "Member"; return p.replace(/\b\w/g,c=>c.toUpperCase()); }
-  function initials(name){ const w=name.trim().split(/\s+/); return ((w[0]||"")[0]||"")+((w[1]||"")[0]||""); }
-  function signIn(email){
-    try{ localStorage.setItem("shuk_email", email); }catch(e){}
-    const name = (email.toLowerCase()==="ij5009518@gmail.com") ? "Isaac Joseph" : deriveName(email);
+  function initials(name){ const w=(name||"").trim().split(/\s+/); return (((w[0]||"")[0]||"")+((w[1]||"")[0]||"")) || "M"; }
+
+  function enterApp(name,email,avatarUrl){
     $("auth").style.display="none"; $("shell").style.display="flex";
-    $("sideName").textContent=name; $("sideEmail").textContent=email; $("avatar").textContent=initials(name).toUpperCase()||"M";
-    $("accName").textContent=name; $("accEmail").textContent=email;
-    document.querySelectorAll(".cardName").forEach(e=>e.textContent=name.toUpperCase());
+    $("sideName").textContent=name; $("sideEmail").textContent=email||"";
+    if(avatarUrl){ $("avatar").innerHTML='<img src="'+avatarUrl+'" alt="">'; } else { $("avatar").textContent=initials(name).toUpperCase(); }
+    $("accName").textContent=name; $("accEmail").textContent=email||"";
+    document.querySelectorAll(".cardName").forEach(e=>e.textContent=(name||"Member").toUpperCase());
+    if(!connectStarted){ connectStarted=true; waitMoovThenConnect(); }
   }
-  function signOut(){ try{ localStorage.removeItem("shuk_email"); }catch(e){} closeDrops(); $("shell").style.display="none"; $("auth").style.display="grid"; }
-  $("signinBtn").addEventListener("click",()=>{ const e=$("signinEmail").value.trim(); if(!e||!/.+@.+\..+/.test(e)){ toast("Enter a valid email."); return; } signIn(e); });
+  function showGate(){ $("shell").style.display="none"; $("auth").style.display="grid"; }
+
+  /* ---------- Clerk (real auth) ---------- */
+  function loadClerk(pk){
+    const s=document.createElement("script");
+    s.setAttribute("data-clerk-publishable-key", pk);
+    s.src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@5/dist/clerk.browser.js";
+    s.async=true; s.crossOrigin="anonymous";
+    s.onload=async ()=>{ try{ await Clerk.load(); clerkActive=true; Clerk.addListener(()=>gateByClerk()); gateByClerk(); }catch(e){ startDemo(); } };
+    s.onerror=()=>startDemo();
+    document.head.appendChild(s);
+  }
+  function gateByClerk(){
+    if(Clerk.user){
+      const u=Clerk.user;
+      const email=(u.primaryEmailAddress&&u.primaryEmailAddress.emailAddress)||"";
+      const name=u.fullName||(u.firstName?((u.firstName+" "+(u.lastName||"")).trim()):deriveName(email));
+      enterApp(name,email,u.imageUrl);
+    } else {
+      $("shell").style.display="none"; $("auth").style.display="grid";
+      $("demoBox").style.display="none";
+      const c=$("clerkSignIn"); c.style.display="block";
+      if(!c._mounted){ c._mounted=true; try{ Clerk.mountSignIn(c); }catch(e){} }
+    }
+  }
+
+  /* ---------- Demo fallback ---------- */
+  function startDemo(){
+    clerkActive=false;
+    $("auth").style.display="grid"; $("clerkSignIn").style.display="none"; $("demoBox").style.display="block";
+    let saved=""; try{ saved=localStorage.getItem("shuk_email")||""; }catch(e){}
+    if(saved){ const n=(saved.toLowerCase()==="ij5009518@gmail.com")?"Isaac Joseph":deriveName(saved); enterApp(n,saved); }
+    else { $("signinEmail").focus(); }
+  }
+  $("signinBtn").addEventListener("click",()=>{ const e=$("signinEmail").value.trim(); if(!e||!/.+@.+\..+/.test(e)){ toast("Enter a valid email."); return; } try{ localStorage.setItem("shuk_email",e); }catch(x){} const n=(e.toLowerCase()==="ij5009518@gmail.com")?"Isaac Joseph":deriveName(e); enterApp(n,e); });
   $("signinEmail").addEventListener("keydown",e=>{ if(e.key==="Enter") $("signinBtn").click(); });
+
+  function signOut(){
+    closeDrops();
+    if(clerkActive && window.Clerk){ Clerk.signOut(); return; }
+    try{ localStorage.removeItem("shuk_email"); }catch(e){}
+    showGate();
+  }
   $("signoutBtn").addEventListener("click", signOut);
 
-  /* ---- Moov token ---- */
+  /* ---------- Moov token (with Clerk bearer) ---------- */
   async function getToken(accountId){
-    const r = await fetch("/api/moov-token", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(accountId?{accountId}:{}) });
+    const headers={"Content-Type":"application/json"};
+    try{ if(clerkActive && window.Clerk && Clerk.session){ const t=await Clerk.session.getToken(); if(t) headers.Authorization="Bearer "+t; } }catch(e){}
+    const r=await fetch("/api/moov-token",{method:"POST",headers,body:JSON.stringify(accountId?{accountId}:{})});
     return r.json();
   }
   function configureDrops(){
@@ -424,24 +464,18 @@
   }
   function needConn(){ if(!state.token||!state.acct){ toast("Still connecting to Moov…"); return true; } return false; }
 
-  /* ---- Drop open / close ---- */
   function showChrome(){ $("backdrop").style.display="block"; $("dropClose").style.display="flex"; }
-  function closeDrops(){
-    ["d-onboard","d-pm","d-issued"].forEach(id=>{ const el=$(id); if(el) try{ el.open=false; }catch(e){} });
-    $("backdrop").style.display="none"; $("dropClose").style.display="none";
-  }
+  function closeDrops(){ ["d-onboard","d-pm","d-issued"].forEach(id=>{ const el=$(id); if(el) try{ el.open=false; }catch(e){} }); $("backdrop").style.display="none"; $("dropClose").style.display="none"; }
   $("dropClose").addEventListener("click", closeDrops);
   $("backdrop").addEventListener("click", closeDrops);
   document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeDrops(); });
 
-  /* ---- Navigation ---- */
   function go(v){
     document.querySelectorAll(".view").forEach(s=>s.hidden=(s.id!=="v-"+v));
     document.querySelectorAll("[data-go]").forEach(b=>b.classList.toggle("on", b.getAttribute("data-go")===v));
-    $("pageTitle").textContent=titles[v]||"Shuk"; $("scroll")&&0; document.querySelector(".scroll").scrollTo(0,0);
+    $("pageTitle").textContent=titles[v]||"Shuk"; document.querySelector(".scroll").scrollTo(0,0);
   }
 
-  /* ---- Global click handling: every button does something ---- */
   document.body.addEventListener("click",(e)=>{
     const drop=e.target.closest("[data-drop]");
     if(drop){
@@ -471,11 +505,9 @@
   });
   $("cardSubmit").addEventListener("click",()=>{ const cl=$("d-cardlink"); if(cl&&cl.submit) cl.submit(); else toast("Card form not ready yet."); });
 
-  /* ---- Developer panel ---- */
   $("devToggle").addEventListener("click",()=>{ $("devp").open=!$("devp").open; });
   $("f-go").addEventListener("click",()=>{ state.token=$("f-token").value.trim(); state.acct=$("f-acct").value.trim(); state.card=$("f-card").value.trim(); if(state.token&&state.acct){ setConnected(true,"Connected (manual token)"); configureDrops(); toast("Connected."); } });
 
-  /* ---- Auto-connect ---- */
   async function autoConnect(){
     try{
       const d=await getToken();
@@ -484,12 +516,13 @@
       else if(d&&d.error){ setConnected(false,"Moov: "+(typeof d.error==="string"?d.error:JSON.stringify(d.error)).slice(0,90)); }
     }catch(e){ setConnected(false,"Offline — paste a token in Developer"); }
   }
+  function waitMoovThenConnect(){ (function w(){ if(moovReady()){ autoConnect(); return; } setTimeout(w,250); })(); }
 
-  /* ---- Boot ---- */
-  (function boot(){
-    let saved=""; try{ saved=localStorage.getItem("shuk_email")||""; }catch(e){}
-    if(saved) signIn(saved); else $("signinEmail").focus();
-    (function w(){ if(moovReady()){ autoConnect(); return; } setTimeout(w,250); })();
+  /* ---------- Boot ---------- */
+  (async function boot(){
+    let cfg={}; try{ cfg=await (await fetch("/api/config")).json(); }catch(e){}
+    if(cfg && cfg.clerkPublishableKey){ loadClerk(cfg.clerkPublishableKey); }
+    else { startDemo(); }
   })();
 </script>
 </body>
