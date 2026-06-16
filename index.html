@@ -3,157 +3,192 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Shuk Wallet</title>
+<title>Shuk</title>
 <script type="text/javascript" src="https://js.moov.io/v1"></script>
 <style>
-  :root { --ink:#0f1422; --muted:#6b7280; --line:#eef0f5; --accent1:#f0732b; --accent2:#f4b740; }
+  :root {
+    --bg:#ffffff; --surface:#f6f7fb; --surface2:#eef0f6; --line:#e7e7f1;
+    --ink:#0b0e16; --muted:#5b5d6a; --faint:#9294a0;
+    --accent:#4a5cf5; --accent2:#3d50ec; --ok:#16a34a; --okbg:#e9f7ef;
+    --card1:#171a2b; --card2:#2b2f52;
+  }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: #eef0f4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: var(--ink); }
+  html, body { margin: 0; background: #eceef4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, Helvetica, Arial, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
   button { font-family: inherit; cursor: pointer; }
-  .app { max-width: 460px; margin: 0 auto; min-height: 100vh; background: #f7f8fa; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 80px -30px rgba(15,20,34,.4); }
+  svg { display: block; }
+  .app { max-width: 440px; margin: 0 auto; min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 80px -34px rgba(11,14,22,.45); }
 
-  /* dev bar */
-  .dev { background: #11151f; color: #cdd3e0; font-size: 12px; }
-  .dev summary { padding: 8px 16px; cursor: pointer; list-style: none; font-weight: 600; color: #aeb6cf; }
-  .dev summary::-webkit-details-marker { display: none; }
-  .dev .body { padding: 4px 16px 14px; display: grid; gap: 8px; }
-  .dev input { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #2a3142; background: #0b0e16; color: #e7ebf3; font-size: 12.5px; }
-  .dev .row { display: flex; gap: 8px; align-items: center; }
-  .dev button { background: var(--accent1); color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 12.5px; }
-  .dev .stat { font-size: 11.5px; }
-  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #6b7280; margin-right: 6px; }
-  .dot.on { background: #2ecc71; }
+  .statusbar { display: flex; align-items: center; gap: 7px; padding: 7px 20px; font-size: 11.5px; color: var(--muted); border-bottom: 1px solid var(--line); }
+  .statusbar .dot { width: 7px; height: 7px; border-radius: 50%; background: #c7cad6; }
+  .statusbar .dot.on { background: #16a34a; }
+  .statusbar .grow { flex: 1; }
+  .statusbar a, .statusbar .mini { color: var(--accent); font-weight: 600; text-decoration: none; cursor: pointer; background: none; border: none; font-size: 11.5px; }
 
-  header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 6px; }
-  .brand { display: flex; align-items: center; gap: 8px; font-weight: 850; font-size: 18px; letter-spacing: -.4px; }
-  .brand .l { font-size: 22px; }
-  .verified { font-size: 11px; font-weight: 700; color: #15a05a; background: #e4f7ec; padding: 5px 10px; border-radius: 20px; }
-  .verified.pending { color: #9a7b1f; background: #fbf3d6; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 8px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 19px; letter-spacing: -.4px; }
+  .mark { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(135deg,var(--accent),#7b88ff); display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 14px; }
+  .pill { font-size: 11px; font-weight: 700; letter-spacing: .2px; padding: 5px 11px; border-radius: 20px; }
+  .pill.ok { color: #15803d; background: var(--okbg); }
+  .pill.pending { color: #92660a; background: #fdf3df; }
 
-  main { flex: 1; padding: 8px 18px 96px; overflow-y: auto; }
+  main { flex: 1; padding: 10px 20px 96px; overflow-y: auto; }
   .view { animation: fade .25s ease; }
-  @keyframes fade { from { opacity: 0; transform: translateY(6px);} to { opacity:1; transform:none; } }
+  @keyframes fade { from { opacity: 0; transform: translateY(5px);} to { opacity:1; transform:none; } }
 
-  /* card */
-  .card { position: relative; border-radius: 22px; padding: 22px; color: #fff; overflow: hidden;
-          background: radial-gradient(120% 140% at 0% 0%, #2a2350 0%, #1b2440 40%, #0f1422 100%); box-shadow: 0 22px 50px -22px rgba(15,20,34,.7); }
-  .card .glow { position: absolute; width: 220px; height: 220px; border-radius: 50%; top: -70px; right: -50px;
-                background: radial-gradient(circle, rgba(244,183,64,.55), rgba(240,115,43,.0) 70%); }
-  .card .top { display: flex; justify-content: space-between; align-items: center; position: relative; }
-  .card .name { font-weight: 800; font-size: 14px; letter-spacing: .3px; }
-  .card .net { font-size: 12px; opacity: .8; }
-  .card .label { margin-top: 22px; font-size: 12px; opacity: .8; }
-  .card .bal { font-size: 38px; font-weight: 850; letter-spacing: -1px; margin-top: 2px; }
-  .card .num { margin-top: 18px; letter-spacing: 3px; font-size: 15px; opacity: .9; font-variant-numeric: tabular-nums; }
-  .card .foot { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11.5px; opacity: .8; }
-  .chip { width: 38px; height: 28px; border-radius: 6px; background: linear-gradient(135deg,#f7e9b0,#caa84e); }
+  .card { position: relative; border-radius: 20px; padding: 22px; color: #fff; overflow: hidden;
+          background: radial-gradient(130% 130% at 100% 0%, #34406e 0%, var(--card2) 38%, var(--card1) 100%); box-shadow: 0 18px 40px -22px rgba(11,14,22,.65); }
+  .card .top { display: flex; justify-content: space-between; align-items: center; }
+  .card .top .nm { font-weight: 700; font-size: 13px; letter-spacing: .3px; opacity: .95; }
+  .card .top .brandmark { font-size: 11px; letter-spacing: 2px; opacity: .65; font-weight: 700; }
+  .card .label { margin-top: 24px; font-size: 12px; opacity: .7; }
+  .card .bal { font-size: 34px; font-weight: 800; letter-spacing: -.8px; margin-top: 3px; }
+  .card .num { margin-top: 20px; letter-spacing: 2px; font-size: 14px; opacity: .82; font-variant-numeric: tabular-nums; }
+  .card .foot { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; opacity: .65; letter-spacing: .5px; }
 
-  .actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-top: 18px; }
-  .act { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 14px 4px; text-align: center; }
-  .act .ic { font-size: 20px; }
-  .act .t { font-size: 11.5px; font-weight: 700; margin-top: 5px; color: #3b4252; }
+  .actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 9px; margin-top: 16px; }
+  .act { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 13px 4px 11px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--ink); }
+  .act:hover { background: var(--surface2); }
+  .act .t { font-size: 11.5px; font-weight: 600; color: #3b3d49; }
+  .act svg { width: 20px; height: 20px; stroke: var(--accent); }
 
-  .sec { font-size: 13px; font-weight: 750; color: #3b4252; margin: 24px 0 10px; display:flex; justify-content:space-between; align-items:center; }
-  .link { background: none; border: none; color: #c05a16; font-size: 13px; font-weight: 700; }
+  .sec { font-size: 12.5px; font-weight: 700; color: #3b3d49; margin: 24px 0 10px; display: flex; justify-content: space-between; align-items: center; }
+  .sec .link { color: var(--accent); font-size: 12.5px; font-weight: 600; background: none; border: none; }
 
-  .list { display: flex; flex-direction: column; gap: 8px; }
-  .tx { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
-  .tx .ic { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-  .tx .nm { font-size: 14px; font-weight: 650; }
-  .tx .dt { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .tx .amt { margin-left: auto; font-weight: 750; font-size: 14px; }
+  .list { display: flex; flex-direction: column; gap: 7px; }
+  .row { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 12px 14px; }
+  .row .ico { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: #fff; border: 1px solid var(--line); }
+  .row .ico svg { width: 17px; height: 17px; }
+  .row .nm { font-size: 14px; font-weight: 600; }
+  .row .dt { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .row .amt { margin-left: auto; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .amt.pos { color: var(--ok); } .amt.neg { color: var(--ink); }
 
-  .panel { background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px; }
-  .ptitle { font-size: 22px; font-weight: 820; margin: 6px 0 16px; }
-  .kv { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); }
-  .kv:last-child { border-bottom:none; }
-  .kv .k { font-size:13px; color:var(--muted); }
-  .kv .v { font-size:14px; font-weight:700; font-family: ui-monospace, Menlo, monospace; }
-  .copy { background:#0f1422; color:#fff; border:none; border-radius:7px; padding:5px 10px; font-size:11.5px; font-weight:700; }
-  .btn { width:100%; border:none; border-radius:13px; padding:14px 0; font-weight:780; font-size:15px; }
-  .btn.pri { background: linear-gradient(135deg,var(--accent1),var(--accent2)); color:#fff; box-shadow:0 12px 26px -12px rgba(240,115,43,.6); }
-  .btn.dark { background:#0f1422; color:#fff; }
-  .btn.ghost { background:#fff; color:#0f1422; border:1px solid #e3e6ef; }
-  .stack { display:grid; gap:10px; margin-top:14px; }
-  .note { font-size:11.5px; color:var(--muted); line-height:1.6; margin-top:12px; }
-  .fdic { font-size:11px; color:#15a05a; font-weight:700; background:#e4f7ec; display:inline-block; padding:4px 9px; border-radius:8px; }
-  .moovbox { margin-top:14px; border:1px dashed #d9deea; border-radius:14px; padding:8px; min-height:60px; }
+  .ptitle { font-size: 21px; font-weight: 800; letter-spacing: -.3px; margin: 8px 0 16px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 6px 16px; }
+  .kv { display: flex; justify-content: space-between; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .kv:last-child { border-bottom: none; }
+  .kv .k { font-size: 13px; color: var(--muted); }
+  .kv .v { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 8px; }
+  .ghostbtn { background: #fff; border: 1px solid var(--line); border-radius: 7px; padding: 5px 10px; font-size: 11.5px; font-weight: 600; color: #3b3d49; }
+  .stack { display: grid; gap: 9px; margin-top: 14px; }
+  .btn { width: 100%; border: none; border-radius: 12px; padding: 14px 0; font-weight: 700; font-size: 14.5px; }
+  .btn.pri { background: var(--accent); color: #fff; }
+  .btn.pri:hover { background: var(--accent2); }
+  .btn.sub { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+  .btn.dark { background: var(--ink); color: #fff; }
+  .note { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-top: 12px; }
+  .badge-ok { font-size: 11px; color: #15803d; background: var(--okbg); display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 8px; font-weight: 600; }
+  .moovbox { margin-top: 14px; border: 1px solid var(--line); border-radius: 14px; padding: 10px; min-height: 56px; background: #fff; }
 
-  nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 460px;
-        display: flex; justify-content: space-around; background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border-top: 1px solid var(--line); padding: 9px 0 14px; }
-  nav button { background: none; border: none; display: flex; flex-direction: column; align-items: center; flex: 1; color: #9aa1b2; font-size: 11px; font-weight: 600; gap: 3px; }
-  nav button.on { color: #c05a16; }
-  nav .ic { font-size: 19px; }
+  nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; display: flex; justify-content: space-around;
+        background: rgba(255,255,255,.96); backdrop-filter: blur(12px); border-top: 1px solid var(--line); padding: 9px 0 14px; }
+  nav button { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; color: var(--faint); font-size: 10.5px; font-weight: 600; }
+  nav button svg { width: 21px; height: 21px; stroke: currentColor; }
+  nav button.on { color: var(--accent); }
 
-  .toast { position: fixed; left: 50%; bottom: 86px; transform: translateX(-50%); background: #0f1422; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; max-width: 400px; box-shadow: 0 12px 30px -10px rgba(0,0,0,.5); display: none; z-index: 50; }
+  .toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; max-width: 380px; box-shadow: 0 14px 32px -10px rgba(0,0,0,.5); display: none; z-index: 50; text-align:center; }
+
+  details.dev { border-bottom: 1px solid var(--line); }
+  details.dev summary { padding: 7px 20px; cursor: pointer; list-style: none; font-size: 11.5px; color: var(--faint); }
+  details.dev summary::-webkit-details-marker { display: none; }
+  details.dev .b { padding: 0 20px 12px; display: grid; gap: 7px; }
+  details.dev input { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); font-size: 12.5px; }
+  details.dev .r { display: flex; gap: 7px; }
+  details.dev button { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 12.5px; }
 </style>
 </head>
 <body>
+<!-- Moov Drops theme (Blueprint) so the embedded dialogs match this app -->
+<style id="moov-theme">
+  :root {
+    --moov-color-background:#FFFFFF;
+    --moov-color-background-secondary:#F6F7FB;
+    --moov-color-background-tertiary:#EEF0F6;
+    --moov-color-primary:#4A5CF5;
+    --moov-color-secondary:#3D50EC;
+    --moov-color-tertiary:#B9BBC3;
+    --moov-color-info:#94CBFF;
+    --moov-color-warn:#EB5757;
+    --moov-color-danger:#EA0F43;
+    --moov-color-success:#16A34A;
+    --moov-color-low-contrast:#5B5D6A;
+    --moov-color-medium-contrast:#494A57;
+    --moov-color-high-contrast:#0B0E16;
+    --moov-color-graphic-1:#4A5CF5;
+    --moov-color-graphic-2:#4A5CF5;
+    --moov-color-graphic-3:#4A5CF5;
+    --moov-radius-small:.5rem;
+    --moov-radius-large:.875rem;
+  }
+</style>
+
 <div class="app">
 
-  <details class="dev">
-    <summary><span id="connDot" class="dot"></span>Developer — connect Moov to make the Drops live</summary>
-    <div class="body">
-      <input id="f-token" placeholder="Moov access token (eyJh…)" autocomplete="off" spellcheck="false" />
-      <div class="row">
+  <div class="statusbar">
+    <span class="dot" id="dot"></span>
+    <span id="statusText">Connecting to Moov…</span>
+    <span class="grow"></span>
+    <button class="mini" onclick="document.getElementById('devp').open=true">Developer</button>
+  </div>
+  <details class="dev" id="devp">
+    <summary>Manual token (optional)</summary>
+    <div class="b">
+      <input id="f-token" placeholder="Moov access token" autocomplete="off" spellcheck="false" />
+      <div class="r">
         <input id="f-acct" placeholder="Account ID" autocomplete="off" spellcheck="false" />
         <input id="f-card" placeholder="Issued card ID (optional)" autocomplete="off" spellcheck="false" />
-        <button id="f-go">Connect</button>
+        <button id="f-go">Use</button>
       </div>
-      <div class="stat" id="connStat">Not connected — the Drops will open but need a valid token to load.</div>
     </div>
   </details>
 
   <header>
-    <div class="brand"><span class="l">🛍️</span><span>Shuk Wallet</span></div>
-    <span class="verified pending" id="kyc">Finish setup</span>
+    <div class="brand"><span class="mark">S</span><span>Shuk</span></div>
+    <span class="pill pending" id="kyc">Unverified</span>
   </header>
 
   <main>
     <!-- HOME -->
     <section class="view" id="v-home">
       <div class="card">
-        <div class="glow"></div>
-        <div class="top"><span class="name">Shuk Wallet</span><span class="net">VISA</span></div>
+        <div class="top"><span class="nm">Shuk · Checking</span><span class="brandmark">VISA</span></div>
         <div class="label">Available balance</div>
         <div class="bal">$4,820.50</div>
         <div class="num">•••• &nbsp;•••• &nbsp;•••• &nbsp;7842</div>
-        <div class="foot"><span>ISAAC J.</span><span>EXP 09/29</span></div>
+        <div class="foot"><span>ISAAC JOSEPH</span><span>09 / 29</span></div>
       </div>
 
       <div class="actions">
-        <button class="act" data-drop="addmoney"><div class="ic">＋</div><div class="t">Add money</div></button>
-        <button class="act" data-go="move"><div class="ic">↗</div><div class="t">Send</div></button>
-        <button class="act" data-go="move"><div class="ic">↙</div><div class="t">Request</div></button>
-        <button class="act" data-go="card"><div class="ic">💳</div><div class="t">Card</div></button>
+        <button class="act" data-drop="addmoney"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="t">Add money</span></button>
+        <button class="act" data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg><span class="t">Send</span></button>
+        <button class="act" data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M15 17H7V9"/></svg><span class="t">Request</span></button>
+        <button class="act" data-go="card"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg><span class="t">Card</span></button>
       </div>
 
       <div class="sec"><span>Recent activity</span></div>
       <div class="list">
-        <div class="tx"><div class="ic" style="background:#e4f7ec;color:#15a05a">↓</div><div><div class="nm">Deposit from Chase ••1187</div><div class="dt">Today</div></div><div class="amt" style="color:#15a05a">+$1,200.00</div></div>
-        <div class="tx"><div class="ic" style="background:#f0ecff;color:#5646e6">↑</div><div><div class="nm">Sunrise Cafe</div><div class="dt">Today</div></div><div class="amt">−$6.40</div></div>
-        <div class="tx"><div class="ic" style="background:#f0ecff;color:#5646e6">↑</div><div><div class="nm">Green Leaf Market</div><div class="dt">Yesterday</div></div><div class="amt">−$54.18</div></div>
-        <div class="tx"><div class="ic" style="background:#e4f7ec;color:#15a05a">↓</div><div><div class="nm">Sent by David K.</div><div class="dt">Yesterday</div></div><div class="amt" style="color:#15a05a">+$40.00</div></div>
+        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><div><div class="nm">Deposit · Chase ••1187</div><div class="dt">Today</div></div><div class="amt pos">+$1,200.00</div></div>
+        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#5b5d6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div><div class="nm">Sunrise Cafe</div><div class="dt">Today</div></div><div class="amt neg">−$6.40</div></div>
+        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#5b5d6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div><div class="nm">Green Leaf Market</div><div class="dt">Yesterday</div></div><div class="amt neg">−$54.18</div></div>
+        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><div><div class="nm">From David Klein</div><div class="dt">Yesterday</div></div><div class="amt pos">+$40.00</div></div>
       </div>
     </section>
 
     <!-- CARD -->
     <section class="view" id="v-card" hidden>
-      <div class="ptitle">Your card</div>
+      <div class="ptitle">Card</div>
       <div class="card">
-        <div class="glow"></div>
-        <div class="top"><span class="name">Shuk Wallet</span><span class="net">VISA</span></div>
-        <div class="label">Virtual debit</div>
-        <div class="num" style="margin-top:34px">•••• &nbsp;•••• &nbsp;•••• &nbsp;7842</div>
-        <div class="foot"><span>ISAAC J.</span><span>EXP 09/29 · CVV •••</span></div>
+        <div class="top"><span class="nm">Shuk · Debit</span><span class="brandmark">VISA</span></div>
+        <div class="num" style="margin-top:36px">•••• &nbsp;•••• &nbsp;•••• &nbsp;7842</div>
+        <div class="foot"><span>ISAAC JOSEPH</span><span>09 / 29 · CVV •••</span></div>
       </div>
       <div class="stack">
-        <button class="btn dark" data-drop="issued">Reveal full card details</button>
-        <button class="btn ghost">❄️ Freeze card</button>
-        <button class="btn ghost">＋ Add to Apple Pay / Google Pay</button>
+        <button class="btn dark" data-drop="issued">Reveal full card number</button>
+        <button class="btn sub">Freeze card</button>
+        <button class="btn sub">Add to Apple Pay / Google Pay</button>
       </div>
-      <div class="moovbox" id="issuedBox"><div class="note">Card numbers are shown inside a secure Moov iframe. Connect Moov + enter an issued card ID, then tap “Reveal full card details.”</div></div>
-      <p class="note">Issued via Moov card issuing. Card numbers are PCI-protected and rendered directly by Moov.</p>
+      <div class="moovbox" id="issuedBox"><div class="note">Card details render inside a secure Moov iframe. Add an issued-card ID in Developer, then reveal.</div></div>
+      <p class="note">Issued via Moov card issuing. Numbers are PCI-protected and rendered by Moov.</p>
     </section>
 
     <!-- BANK -->
@@ -161,60 +196,57 @@
       <div class="ptitle">Banking</div>
       <div class="panel">
         <div class="kv"><span class="k">Balance</span><span class="v">$4,820.50</span></div>
-        <div class="kv"><span class="k">Account number</span><span class="v">•••• 7890 <button class="copy" data-copy="1100007890">Copy</button></span></div>
-        <div class="kv"><span class="k">Routing number</span><span class="v">021000021 <button class="copy" data-copy="021000021">Copy</button></span></div>
+        <div class="kv"><span class="k">Account number</span><span class="v">•••• 7890 <button class="ghostbtn" data-copy="1100007890">Copy</button></span></div>
+        <div class="kv"><span class="k">Routing number</span><span class="v">021000021 <button class="ghostbtn" data-copy="021000021">Copy</button></span></div>
       </div>
-      <div style="margin-top:12px"><span class="fdic">FDIC insured via partner bank</span></div>
-
-      <div class="sec"><span>Linked external accounts</span></div>
+      <div style="margin-top:12px"><span class="badge-ok">FDIC insured via partner bank</span></div>
+      <div class="sec"><span>Linked accounts</span></div>
       <div class="list">
-        <div class="tx"><div class="ic" style="background:#eef1ff;color:#2b3a8f">🏦</div><div><div class="nm">Chase ••1187</div><div class="dt">Checking · verified</div></div></div>
+        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#4a5cf5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></div><div><div class="nm">Chase ••1187</div><div class="dt">Checking · verified</div></div></div>
       </div>
-      <div class="stack">
-        <button class="btn pri" data-drop="bank">Link a bank account</button>
-      </div>
-      <p class="note">Bank accounts & ACH provided by Moov’s partner bank. Linking uses the Moov payment-methods Drop (with optional Plaid instant verification).</p>
+      <div class="stack"><button class="btn pri" data-drop="bank">Link a bank account</button></div>
+      <p class="note">Bank accounts &amp; ACH provided by Moov’s partner bank. Linking uses the Moov payment-methods Drop.</p>
     </section>
 
     <!-- MOVE -->
     <section class="view" id="v-move" hidden>
       <div class="ptitle">Move money</div>
       <div class="stack">
-        <button class="btn pri" data-drop="addmoney">↓ Add money from a bank</button>
-        <button class="btn dark">↗ Send to a person</button>
-        <button class="btn ghost">↙ Request money</button>
-        <button class="btn ghost" data-drop="cardlink">💳 Link a card</button>
+        <button class="btn pri" data-drop="addmoney">Add money from a bank</button>
+        <button class="btn dark">Send to a person</button>
+        <button class="btn sub">Request money</button>
+        <button class="btn sub" data-drop="cardlink">Link a card</button>
       </div>
       <div class="moovbox" id="cardlinkBox" hidden>
         <form id="cardForm"><moov-card-link id="d-cardlink"></moov-card-link></form>
         <button class="btn dark" id="cardSubmit" style="margin-top:10px">Save card</button>
       </div>
-      <p class="note">Send and receive money on Moov’s licensed rails — no money transmitter license of your own. Real P2P/transfers run through Moov, not your servers.</p>
+      <p class="note">Send and receive on Moov’s licensed rails — no money transmitter license of your own.</p>
     </section>
 
     <!-- ACCOUNT -->
     <section class="view" id="v-account" hidden>
       <div class="ptitle">Account</div>
       <div class="panel">
-        <div class="kv"><span class="k">Name</span><span class="v" style="font-family:inherit;font-weight:700">Isaac J.</span></div>
-        <div class="kv"><span class="k">Email</span><span class="v" style="font-family:inherit;font-weight:500">ij5009518@gmail.com</span></div>
-        <div class="kv"><span class="k">Identity (KYC)</span><span class="v" style="font-family:inherit;color:#9a7b1f;font-weight:700">Pending</span></div>
+        <div class="kv"><span class="k">Name</span><span class="v" style="font-variant-numeric:normal">Isaac Joseph</span></div>
+        <div class="kv"><span class="k">Email</span><span class="v" style="font-variant-numeric:normal;font-weight:500">ij5009518@gmail.com</span></div>
+        <div class="kv"><span class="k">Identity (KYC)</span><span class="v" id="kyc2" style="font-variant-numeric:normal;color:#92660a">Unverified</span></div>
       </div>
       <div class="stack">
-        <button class="btn pri" data-drop="onboard">Open / complete your account</button>
-        <button class="btn ghost" data-drop="bank">Manage payment methods</button>
-        <button class="btn ghost">Settings</button>
+        <button class="btn pri" data-drop="onboard">Open / verify your account</button>
+        <button class="btn sub" data-drop="bank">Manage payment methods</button>
+        <button class="btn sub">Settings</button>
       </div>
-      <p class="note">“Open / complete your account” launches Moov’s onboarding Drop, which collects identity & verification for wallet, send/collect, and card-issuing capabilities — PII goes straight to Moov.</p>
+      <p class="note">“Open / verify your account” launches Moov’s onboarding Drop — identity &amp; verification for wallet, send/collect, and card-issuing. PII goes straight to Moov.</p>
     </section>
   </main>
 
   <nav>
-    <button class="on" data-go="home"><span class="ic">🏠</span>Home</button>
-    <button data-go="card"><span class="ic">💳</span>Card</button>
-    <button data-go="bank"><span class="ic">🏦</span>Bank</button>
-    <button data-go="move"><span class="ic">↔️</span>Move</button>
-    <button data-go="account"><span class="ic">👤</span>Account</button>
+    <button class="on" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Home</button>
+    <button data-go="card"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>Card</button>
+    <button data-go="bank"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>Bank</button>
+    <button data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l-4 4 4 4M3 14h12M17 14l4-4-4-4M21 10H9"/></svg>Move</button>
+    <button data-go="account"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Account</button>
   </nav>
 
   <div class="toast" id="toast"></div>
@@ -226,92 +258,84 @@
 <moov-issued-card id="d-issued" hidden></moov-issued-card>
 
 <script>
-  const state = { token:"", acct:"", card:"", ready:false };
-
+  const state = { token:"", acct:"", card:"" };
+  const $ = (id) => document.getElementById(id);
   function moovReady(){ return window.customElements && window.customElements.get("moov-onboarding"); }
-  function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",3200); }
+  function toast(m){ const t=$("toast"); t.textContent=m; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",3600); }
+  function setConnected(on,msg){ $("dot").className="dot"+(on?" on":""); $("statusText").textContent=msg; if(on){ $("kyc").textContent="Verified"; $("kyc").className="pill ok"; $("kyc2").textContent="Verified"; $("kyc2").style.color="#15803d"; } }
 
-  // dev connect
-  document.getElementById("f-go").addEventListener("click", ()=>{
-    state.token = document.getElementById("f-token").value.trim();
-    state.acct = document.getElementById("f-acct").value.trim();
-    state.card = document.getElementById("f-card").value.trim();
-    const ok = !!(state.token && state.acct);
-    document.getElementById("connDot").className = "dot" + (ok?" on":"");
-    document.getElementById("connStat").textContent = ok ? "Connected — Drops are live." : "Enter a token and account ID.";
-    if (ok) { document.getElementById("kyc").textContent="Verified"; document.getElementById("kyc").className="verified"; }
-    configureDrops();
-    toast(ok ? "Moov connected — Drops are live." : "Add a token + account ID.");
-  });
+  async function getToken(accountId){
+    const r = await fetch("/api/moov-token", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(accountId?{accountId}:{}) });
+    return r.json();
+  }
 
   function configureDrops(){
-    if (!moovReady()) return;
-    const onboard=document.getElementById("d-onboard");
+    if(!moovReady()) return;
+    const onboard=$("d-onboard");
     onboard.facilitatorAccountID = state.acct;
     onboard.token = state.token;
     onboard.capabilities = ["wallet.balance","send-funds","collect-funds","card-issuing"];
     onboard.accountTypes = ["individual","business"];
-    onboard.onSuccess = ()=>toast("✅ Onboarding complete!");
-    onboard.onError = (e)=>toast("Onboarding error: "+(e&&e.message||e));
+    onboard.showLogo = false;
+    // Critical fix for the "loading forever" step: as onboarding creates the
+    // account, re-mint a token scoped to that new account so the next steps load.
+    onboard.onResourceCreated = async ({ resourceType, resource }) => {
+      try {
+        if (resourceType === "account" && resource && resource.accountID) {
+          const d = await getToken(resource.accountID);
+          if (d && d.token) onboard.token = d.token;
+        }
+      } catch(e){}
+    };
+    onboard.onSuccess = ()=>{ toast("Account verified."); setConnected(true,"Verified with Moov"); };
+    onboard.onError = (e)=>toast("Onboarding error: "+((e&&e.message)||e));
 
-    const pm=document.getElementById("d-pm");
-    pm.token = state.token; pm.accountID = state.acct;
-    pm.onSuccess = ()=>toast("✅ Payment method linked!");
-    pm.onError = (e)=>toast("Link error: "+(e&&(e.error&&e.error.message||e.message)||e));
+    const pm=$("d-pm");
+    pm.token=state.token; pm.accountID=state.acct;
+    pm.onSuccess=()=>toast("Payment method linked.");
+    pm.onError=(e)=>toast("Link error: "+((e&&(e.error&&e.error.message||e.message))||e));
 
-    const issued=document.getElementById("d-issued");
-    issued.oauthToken = state.token; issued.accountID = state.acct;
-    if (state.card) issued.issuedCardID = state.card;
+    const ic=$("d-issued");
+    ic.oauthToken=state.token; ic.accountID=state.acct;
+    if(state.card) ic.issuedCardID=state.card;
 
-    const cl=document.getElementById("d-cardlink");
-    if (cl){ cl.oauthToken = state.token; cl.accountID = state.acct; cl.onSuccess=()=>toast("✅ Card saved!"); cl.onError=(c,a)=>toast("Card error: "+(c||(a&&a.error)||"")); }
+    const cl=$("d-cardlink");
+    if(cl){ cl.oauthToken=state.token; cl.accountID=state.acct; cl.onSuccess=()=>toast("Card saved."); cl.onError=(c,a)=>toast("Card error: "+(c||(a&&a.error)||"")); }
   }
 
-  function needConn(){ if(!state.token||!state.acct){ toast("Connect Moov first (Developer panel at the top)."); document.querySelector(".dev").open=true; return true;} return false; }
+  function needConn(){ if(!state.token||!state.acct){ toast("Still connecting to Moov…"); return true; } return false; }
 
-  // drop triggers
   document.body.addEventListener("click",(e)=>{
-    const drop=e.target.closest("[data-drop]"); if(!drop) return;
-    const kind=drop.getAttribute("data-drop");
-    if (kind==="onboard"){ if(needConn())return; document.getElementById("d-onboard").open=true; }
-    else if (kind==="bank"){ if(needConn())return; const pm=document.getElementById("d-pm"); pm.paymentMethodTypes=["bankAccount","card"]; pm.open=true; }
-    else if (kind==="addmoney"){ if(needConn())return; const pm=document.getElementById("d-pm"); pm.paymentMethodTypes=["bankAccount"]; pm.open=true; }
-    else if (kind==="issued"){ if(needConn())return; const box=document.getElementById("issuedBox"); const ic=document.getElementById("d-issued"); ic.hidden=false; box.innerHTML=""; box.appendChild(ic); if(!state.card) toast("Add an issued card ID in the Developer panel to load real details."); }
-    else if (kind==="cardlink"){ if(needConn())return; document.getElementById("cardlinkBox").hidden=false; }
+    const d=e.target.closest("[data-drop]");
+    if(d){
+      const k=d.getAttribute("data-drop");
+      if(k==="onboard"){ if(needConn())return; $("d-onboard").open=true; }
+      else if(k==="bank"){ if(needConn())return; const pm=$("d-pm"); pm.paymentMethodTypes=["bankAccount","card"]; pm.open=true; }
+      else if(k==="addmoney"){ if(needConn())return; const pm=$("d-pm"); pm.paymentMethodTypes=["bankAccount"]; pm.open=true; }
+      else if(k==="issued"){ if(needConn())return; const box=$("issuedBox"), ic=$("d-issued"); ic.hidden=false; box.innerHTML=""; box.appendChild(ic); if(!state.card) toast("Add an issued-card ID in Developer to load real details."); }
+      else if(k==="cardlink"){ if(needConn())return; $("cardlinkBox").hidden=false; }
+      return;
+    }
+    const g=e.target.closest("[data-go]");
+    if(g){ const v=g.getAttribute("data-go"); document.querySelectorAll(".view").forEach(s=>s.hidden=(s.id!=="v-"+v)); document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on", b.getAttribute("data-go")===v)); document.querySelector("main").scrollTo(0,0); return; }
+    const c=e.target.closest("[data-copy]");
+    if(c){ navigator.clipboard&&navigator.clipboard.writeText(c.getAttribute("data-copy")); toast("Copied"); }
   });
-  const cs=document.getElementById("cardSubmit"); if(cs) cs.addEventListener("click",()=>{ const cl=document.getElementById("d-cardlink"); if(cl&&cl.submit) cl.submit(); });
+  const csb=$("cardSubmit"); if(csb) csb.addEventListener("click",()=>{ const cl=$("d-cardlink"); if(cl&&cl.submit) cl.submit(); });
 
-  // nav + view switching
-  function go(view){
-    document.querySelectorAll(".view").forEach(s=>s.hidden = (s.id!=="v-"+view));
-    document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on", b.getAttribute("data-go")===view));
-    document.querySelector("main").scrollTo(0,0);
-  }
-  document.body.addEventListener("click",(e)=>{ const g=e.target.closest("[data-go]"); if(g) go(g.getAttribute("data-go")); });
+  $("f-go").addEventListener("click",()=>{
+    state.token=$("f-token").value.trim(); state.acct=$("f-acct").value.trim(); state.card=$("f-card").value.trim();
+    if(state.token&&state.acct){ setConnected(true,"Connected (manual token)"); configureDrops(); toast("Connected."); }
+  });
 
-  // copy
-  document.body.addEventListener("click",(e)=>{ const c=e.target.closest("[data-copy]"); if(c){ navigator.clipboard&&navigator.clipboard.writeText(c.getAttribute("data-copy")); toast("Copied"); } });
-
-  // auto-connect via the backend token endpoint (secret stays server-side)
   async function autoConnect(){
     try {
-      const r = await fetch("/api/moov-token", { method:"POST" });
-      const d = await r.json();
-      if (d && d.needsKeys){ document.getElementById("connStat").textContent="Backend ready — add MOOV_PUBLIC_KEY, MOOV_PRIVATE_KEY, MOOV_ACCOUNT_ID in Vercel to go live."; return; }
-      if (d && d.token && d.accountId){
-        state.token=d.token; state.acct=d.accountId;
-        document.getElementById("f-acct").value=d.accountId;
-        document.getElementById("connDot").className="dot on";
-        document.getElementById("connStat").textContent="Connected via backend — Drops are live.";
-        document.getElementById("kyc").textContent="Verified"; document.getElementById("kyc").className="verified";
-        configureDrops();
-      } else if (d && d.error){
-        document.getElementById("connStat").textContent="Token error: "+(typeof d.error==="string"?d.error:JSON.stringify(d.error)).slice(0,160);
-      }
-    } catch(e){ /* no backend (e.g. opened as a local file) — manual paste still works */ }
+      const d = await getToken();
+      if(d&&d.needsKeys){ setConnected(false,"Add Moov keys in Vercel to go live"); return; }
+      if(d&&d.token&&d.accountId){ state.token=d.token; state.acct=d.accountId; $("f-acct").value=d.accountId; setConnected(true,"Connected to Moov"); configureDrops(); }
+      else if(d&&d.error){ setConnected(false,"Moov: "+(typeof d.error==="string"?d.error:JSON.stringify(d.error)).slice(0,120)); }
+    } catch(e){ setConnected(false,"Open developer to paste a token"); }
   }
-
-  // wait for moov, then auto-connect
   (function w(){ if(moovReady()){ autoConnect(); return; } setTimeout(w,250); })();
 </script>
 </body>
