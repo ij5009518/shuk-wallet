@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Shuk</title>
 <script type="text/javascript" src="https://js.moov.io/v1"></script>
 <style>
@@ -13,330 +13,484 @@
     --card1:#171a2b; --card2:#2b2f52;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: #eceef4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, Helvetica, Arial, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+  html, body { margin: 0; background: #f3f4f8; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, Helvetica, Arial, sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
   button { font-family: inherit; cursor: pointer; }
+  input { font-family: inherit; }
   svg { display: block; }
-  .app { max-width: 440px; margin: 0 auto; min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 80px -34px rgba(11,14,22,.45); }
 
-  .statusbar { display: flex; align-items: center; gap: 7px; padding: 7px 20px; font-size: 11.5px; color: var(--muted); border-bottom: 1px solid var(--line); }
-  .statusbar .dot { width: 7px; height: 7px; border-radius: 50%; background: #c7cad6; }
-  .statusbar .dot.on { background: #16a34a; }
-  .statusbar .grow { flex: 1; }
-  .statusbar a, .statusbar .mini { color: var(--accent); font-weight: 600; text-decoration: none; cursor: pointer; background: none; border: none; font-size: 11.5px; }
+  /* ---------- Sign-in gate ---------- */
+  .auth { position: fixed; inset: 0; display: grid; place-items: center; background: radial-gradient(120% 120% at 80% 0%, #21264a 0%, #12152a 55%, #0b0e1a 100%); padding: 24px; z-index: 100; }
+  .auth .box { background: #fff; border-radius: 20px; padding: 34px 32px; width: 100%; max-width: 380px; box-shadow: 0 30px 70px -30px rgba(0,0,0,.6); }
+  .auth .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 22px; letter-spacing: -.5px; margin-bottom: 6px; }
+  .auth p { color: var(--muted); font-size: 14px; margin: 0 0 22px; }
+  .auth label { font-size: 12.5px; font-weight: 600; color: #3b3d49; display: block; margin: 0 0 6px; }
+  .auth input { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 11px; font-size: 14.5px; margin-bottom: 14px; }
+  .auth input:focus { outline: none; border-color: var(--accent); }
+  .auth .go { width: 100%; border: none; background: var(--accent); color: #fff; padding: 13px 0; border-radius: 11px; font-weight: 700; font-size: 15px; }
+  .auth .go:hover { background: var(--accent2); }
+  .auth .fine { font-size: 11.5px; color: var(--faint); margin-top: 16px; line-height: 1.6; }
+  .mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg,var(--accent),#7b88ff); display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px; flex: none; }
 
-  header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 8px; }
-  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 19px; letter-spacing: -.4px; }
-  .mark { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(135deg,var(--accent),#7b88ff); display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 14px; }
-  .pill { font-size: 11px; font-weight: 700; letter-spacing: .2px; padding: 5px 11px; border-radius: 20px; }
-  .pill.ok { color: #15803d; background: var(--okbg); }
-  .pill.pending { color: #92660a; background: #fdf3df; }
+  /* ---------- Shell ---------- */
+  .shell { display: none; min-height: 100vh; }
+  aside.side { width: 252px; flex: none; background: #fff; border-right: 1px solid var(--line); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 22px 16px; }
+  .side .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; letter-spacing: -.4px; padding: 4px 8px 18px; }
+  .side nav { display: flex; flex-direction: column; gap: 3px; }
+  .side nav button { display: flex; align-items: center; gap: 12px; background: none; border: none; border-radius: 11px; padding: 11px 12px; font-size: 14.5px; font-weight: 600; color: var(--muted); text-align: left; width: 100%; }
+  .side nav button svg { width: 19px; height: 19px; stroke: currentColor; flex: none; }
+  .side nav button:hover { background: var(--surface); color: var(--ink); }
+  .side nav button.on { background: #eef1ff; color: var(--accent); }
+  .side .spacer { flex: 1; }
+  .userchip { border-top: 1px solid var(--line); padding-top: 14px; }
+  .userchip .who { display: flex; align-items: center; gap: 10px; padding: 4px 8px; }
+  .userchip .av { width: 34px; height: 34px; border-radius: 50%; background: var(--surface2); display: grid; place-items: center; font-weight: 700; font-size: 13px; color: #3b3d49; flex: none; }
+  .userchip .nm { font-size: 13.5px; font-weight: 700; line-height: 1.2; }
+  .userchip .em { font-size: 11.5px; color: var(--faint); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+  .userchip .out { margin-top: 8px; width: 100%; display: flex; align-items: center; gap: 9px; background: none; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .userchip .out:hover { background: var(--surface); color: var(--ink); }
+  .userchip .out svg { width: 16px; height: 16px; stroke: currentColor; }
 
-  main { flex: 1; padding: 10px 20px 96px; overflow-y: auto; }
-  .view { animation: fade .25s ease; }
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  header.top { position: sticky; top: 0; z-index: 6; background: rgba(255,255,255,.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); padding: 15px 36px; display: flex; align-items: center; gap: 16px; }
+  header.top .title { font-size: 19px; font-weight: 800; letter-spacing: -.3px; }
+  header.top .grow { flex: 1; }
+  header.top .conn { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); }
+  header.top .conn .dot { width: 8px; height: 8px; border-radius: 50%; background: #c7cad6; }
+  header.top .conn .dot.on { background: #16a34a; }
+  header.top .dev { color: var(--accent); background: none; border: none; font-size: 12.5px; font-weight: 600; }
+
+  details.devp { border-bottom: 1px solid var(--line); background: var(--surface); }
+  details.devp summary { padding: 8px 36px; cursor: pointer; list-style: none; font-size: 11.5px; color: var(--faint); }
+  details.devp summary::-webkit-details-marker { display: none; }
+  details.devp .b { padding: 0 36px 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+  details.devp input { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); font-size: 12.5px; min-width: 200px; flex: 1; }
+  details.devp button { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 700; font-size: 12.5px; }
+
+  .scroll { padding: 30px 36px 70px; width: 100%; max-width: 1120px; }
+  .view { animation: fade .22s ease; }
   @keyframes fade { from { opacity: 0; transform: translateY(5px);} to { opacity:1; transform:none; } }
 
-  .card { position: relative; border-radius: 20px; padding: 22px; color: #fff; overflow: hidden;
-          background: radial-gradient(130% 130% at 100% 0%, #34406e 0%, var(--card2) 38%, var(--card1) 100%); box-shadow: 0 18px 40px -22px rgba(11,14,22,.65); }
+  .home { display: grid; grid-template-columns: minmax(0,1.05fr) minmax(0,.95fr); gap: 26px; align-items: start; }
+  .col { display: flex; flex-direction: column; gap: 18px; }
+
+  .card { position: relative; border-radius: 20px; padding: 24px; color: #fff; overflow: hidden; max-width: 440px;
+          background: radial-gradient(130% 130% at 100% 0%, #34406e 0%, var(--card2) 38%, var(--card1) 100%); box-shadow: 0 18px 44px -22px rgba(11,14,22,.6); }
+  .card.frozen { filter: grayscale(.6) brightness(.9); }
   .card .top { display: flex; justify-content: space-between; align-items: center; }
   .card .top .nm { font-weight: 700; font-size: 13px; letter-spacing: .3px; opacity: .95; }
   .card .top .brandmark { font-size: 11px; letter-spacing: 2px; opacity: .65; font-weight: 700; }
   .card .label { margin-top: 24px; font-size: 12px; opacity: .7; }
-  .card .bal { font-size: 34px; font-weight: 800; letter-spacing: -.8px; margin-top: 3px; }
-  .card .num { margin-top: 20px; letter-spacing: 2px; font-size: 14px; opacity: .82; font-variant-numeric: tabular-nums; }
-  .card .foot { display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; opacity: .65; letter-spacing: .5px; }
+  .card .bal { font-size: 36px; font-weight: 800; letter-spacing: -.8px; margin-top: 3px; }
+  .card .num { margin-top: 22px; letter-spacing: 2px; font-size: 14.5px; opacity: .85; font-variant-numeric: tabular-nums; }
+  .card .foot { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; opacity: .65; letter-spacing: .5px; }
+  .froztag { position: absolute; top: 16px; right: 18px; background: rgba(255,255,255,.18); font-size: 10.5px; font-weight: 700; letter-spacing: .5px; padding: 4px 9px; border-radius: 20px; display: none; }
+  .card.frozen .froztag { display: block; }
 
-  .actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 9px; margin-top: 16px; }
-  .act { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 13px 4px 11px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--ink); }
-  .act:hover { background: var(--surface2); }
-  .act .t { font-size: 11.5px; font-weight: 600; color: #3b3d49; }
-  .act svg { width: 20px; height: 20px; stroke: var(--accent); }
+  .actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 11px; max-width: 440px; }
+  .act { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 15px 4px 12px; display: flex; flex-direction: column; align-items: center; gap: 7px; color: var(--ink); }
+  .act:hover { background: var(--surface); border-color: #d9dcea; }
+  .act .t { font-size: 12px; font-weight: 600; color: #3b3d49; }
+  .act svg { width: 21px; height: 21px; stroke: var(--accent); }
 
-  .sec { font-size: 12.5px; font-weight: 700; color: #3b3d49; margin: 24px 0 10px; display: flex; justify-content: space-between; align-items: center; }
-  .sec .link { color: var(--accent); font-size: 12.5px; font-weight: 600; background: none; border: none; }
+  .block { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; }
+  .block h3 { font-size: 14px; font-weight: 700; margin: 0 0 14px; }
+  .sec { font-size: 13px; font-weight: 700; color: #3b3d49; margin: 4px 0 12px; }
 
-  .list { display: flex; flex-direction: column; gap: 7px; }
-  .row { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 13px; padding: 12px 14px; }
-  .row .ico { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: #fff; border: 1px solid var(--line); }
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .row { display: flex; align-items: center; gap: 13px; padding: 11px 4px; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: none; }
+  .row .ico { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: var(--surface); flex: none; }
   .row .ico svg { width: 17px; height: 17px; }
   .row .nm { font-size: 14px; font-weight: 600; }
   .row .dt { font-size: 12px; color: var(--muted); margin-top: 1px; }
   .row .amt { margin-left: auto; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
   .amt.pos { color: var(--ok); } .amt.neg { color: var(--ink); }
 
-  .ptitle { font-size: 21px; font-weight: 800; letter-spacing: -.3px; margin: 8px 0 16px; }
-  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 6px 16px; }
-  .kv { display: flex; justify-content: space-between; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .kv { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
   .kv:last-child { border-bottom: none; }
   .kv .k { font-size: 13px; color: var(--muted); }
-  .kv .v { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 8px; }
+  .kv .v { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 9px; }
   .ghostbtn { background: #fff; border: 1px solid var(--line); border-radius: 7px; padding: 5px 10px; font-size: 11.5px; font-weight: 600; color: #3b3d49; }
-  .stack { display: grid; gap: 9px; margin-top: 14px; }
-  .btn { width: 100%; border: none; border-radius: 12px; padding: 14px 0; font-weight: 700; font-size: 14.5px; }
-  .btn.pri { background: var(--accent); color: #fff; }
-  .btn.pri:hover { background: var(--accent2); }
-  .btn.sub { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
-  .btn.dark { background: var(--ink); color: #fff; }
-  .note { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-top: 12px; }
-  .badge-ok { font-size: 11px; color: #15803d; background: var(--okbg); display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 8px; font-weight: 600; }
-  .moovbox { margin-top: 14px; border: 1px solid var(--line); border-radius: 14px; padding: 10px; min-height: 56px; background: #fff; }
+  .ghostbtn:hover { background: var(--surface); }
+  .badge-ok { font-size: 11.5px; color: #15803d; background: var(--okbg); display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 8px; font-weight: 600; margin-top: 14px; }
 
-  nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; display: flex; justify-content: space-around;
-        background: rgba(255,255,255,.96); backdrop-filter: blur(12px); border-top: 1px solid var(--line); padding: 9px 0 14px; }
-  nav button { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; color: var(--faint); font-size: 10.5px; font-weight: 600; }
-  nav button svg { width: 21px; height: 21px; stroke: currentColor; }
-  nav button.on { color: var(--accent); }
+  .btnrow { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .btn { border: none; border-radius: 11px; padding: 12px 20px; font-weight: 700; font-size: 14px; }
+  .btn.pri { background: var(--accent); color: #fff; } .btn.pri:hover { background: var(--accent2); }
+  .btn.dark { background: var(--ink); color: #fff; } .btn.dark:hover { opacity: .9; }
+  .btn.sub { background: #fff; color: var(--ink); border: 1px solid var(--line); } .btn.sub:hover { background: var(--surface); }
+  .btn.block { width: 100%; }
+  .note { font-size: 12px; color: var(--muted); line-height: 1.65; margin-top: 14px; }
+  .moovbox { margin-top: 16px; border: 1px solid var(--line); border-radius: 14px; padding: 12px; min-height: 56px; background: var(--surface); }
+  .ptitle { display: none; }
 
-  .toast { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; max-width: 380px; box-shadow: 0 14px 32px -10px rgba(0,0,0,.5); display: none; z-index: 50; text-align:center; }
+  /* ---------- Drop modal chrome ---------- */
+  #backdrop { position: fixed; inset: 0; background: rgba(11,14,22,.45); z-index: 2147482000; display: none; }
+  #dropClose { position: fixed; top: 20px; right: 24px; z-index: 2147483600; display: none; align-items: center; gap: 8px;
+    background: #fff; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 10px 16px; font-size: 13.5px; font-weight: 700; box-shadow: 0 10px 28px -8px rgba(0,0,0,.4); }
+  #dropClose:hover { background: var(--surface); }
+  #dropClose svg { width: 15px; height: 15px; stroke: currentColor; }
 
-  details.dev { border-bottom: 1px solid var(--line); }
-  details.dev summary { padding: 7px 20px; cursor: pointer; list-style: none; font-size: 11.5px; color: var(--faint); }
-  details.dev summary::-webkit-details-marker { display: none; }
-  details.dev .b { padding: 0 20px 12px; display: grid; gap: 7px; }
-  details.dev input { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); font-size: 12.5px; }
-  details.dev .r { display: flex; gap: 7px; }
-  details.dev button { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 12.5px; }
+  .toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 12px; font-size: 13.5px; max-width: 420px; box-shadow: 0 16px 34px -10px rgba(0,0,0,.5); display: none; z-index: 2147483647; text-align: center; }
+
+  /* ---------- Mobile fallback nav ---------- */
+  .mobnav { display: none; }
+  @media (max-width: 880px) {
+    aside.side { display: none; }
+    header.top, details.devp summary, details.devp .b, .scroll { padding-left: 18px; padding-right: 18px; }
+    .home { grid-template-columns: 1fr; }
+    .scroll { padding-bottom: 96px; }
+    .mobnav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,.97); backdrop-filter: blur(12px); border-top: 1px solid var(--line); padding: 9px 0 14px; z-index: 30; }
+    .mobnav button { flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; color: var(--faint); }
+    .mobnav button svg { width: 21px; height: 21px; stroke: currentColor; }
+    .mobnav button.on { color: var(--accent); }
+  }
 </style>
 </head>
 <body>
-<!-- Moov Drops theme (Blueprint) so the embedded dialogs match this app -->
+<!-- Moov Drops theme (Blueprint) so embedded dialogs match this app -->
 <style id="moov-theme">
   :root {
-    --moov-color-background:#FFFFFF;
-    --moov-color-background-secondary:#F6F7FB;
-    --moov-color-background-tertiary:#EEF0F6;
-    --moov-color-primary:#4A5CF5;
-    --moov-color-secondary:#3D50EC;
-    --moov-color-tertiary:#B9BBC3;
-    --moov-color-info:#94CBFF;
-    --moov-color-warn:#EB5757;
-    --moov-color-danger:#EA0F43;
-    --moov-color-success:#16A34A;
-    --moov-color-low-contrast:#5B5D6A;
-    --moov-color-medium-contrast:#494A57;
-    --moov-color-high-contrast:#0B0E16;
-    --moov-color-graphic-1:#4A5CF5;
-    --moov-color-graphic-2:#4A5CF5;
-    --moov-color-graphic-3:#4A5CF5;
-    --moov-radius-small:.5rem;
-    --moov-radius-large:.875rem;
+    --moov-color-background:#FFFFFF; --moov-color-background-secondary:#F6F7FB; --moov-color-background-tertiary:#EEF0F6;
+    --moov-color-primary:#4A5CF5; --moov-color-secondary:#3D50EC; --moov-color-tertiary:#B9BBC3;
+    --moov-color-info:#94CBFF; --moov-color-warn:#EB5757; --moov-color-danger:#EA0F43; --moov-color-success:#16A34A;
+    --moov-color-low-contrast:#5B5D6A; --moov-color-medium-contrast:#494A57; --moov-color-high-contrast:#0B0E16;
+    --moov-color-graphic-1:#4A5CF5; --moov-color-graphic-2:#4A5CF5; --moov-color-graphic-3:#4A5CF5;
+    --moov-radius-small:.5rem; --moov-radius-large:.875rem;
   }
 </style>
 
-<div class="app">
-
-  <div class="statusbar">
-    <span class="dot" id="dot"></span>
-    <span id="statusText">Connecting to Moov…</span>
-    <span class="grow"></span>
-    <button class="mini" onclick="document.getElementById('devp').open=true">Developer</button>
+<!-- ===== Sign-in gate ===== -->
+<div class="auth" id="auth">
+  <div class="box">
+    <div class="brand"><span class="mark">S</span><span>Shuk</span></div>
+    <p>Your money, your card, your bank — in one place.</p>
+    <label for="signinEmail">Email</label>
+    <input id="signinEmail" type="email" placeholder="you@email.com" autocomplete="username" />
+    <button class="go" id="signinBtn">Sign in</button>
+    <p class="fine">Demo wallet on Moov’s sandbox. No real funds move. Identity, banking and card issuing are provided by Moov Financial.</p>
   </div>
-  <details class="dev" id="devp">
-    <summary>Manual token (optional)</summary>
-    <div class="b">
-      <input id="f-token" placeholder="Moov access token" autocomplete="off" spellcheck="false" />
-      <div class="r">
+</div>
+
+<!-- ===== App ===== -->
+<div class="shell" id="shell">
+  <aside class="side">
+    <div class="brand"><span class="mark">S</span><span>Shuk</span></div>
+    <nav>
+      <button class="on" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Home</button>
+      <button data-go="card"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>Card</button>
+      <button data-go="bank"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>Banking</button>
+      <button data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l-4 4 4 4M3 14h12M17 14l4-4-4-4M21 10H9"/></svg>Move money</button>
+      <button data-go="account"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Account</button>
+    </nav>
+    <div class="spacer"></div>
+    <div class="userchip">
+      <div class="who"><div class="av" id="avatar">IJ</div><div><div class="nm" id="sideName">Isaac Joseph</div><div class="em" id="sideEmail">—</div></div></div>
+      <button class="out" id="signoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign out</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <span class="title" id="pageTitle">Home</span>
+      <span class="grow"></span>
+      <span class="conn"><span class="dot" id="dot"></span><span id="statusText">Connecting…</span></span>
+      <button class="dev" id="devToggle">Developer</button>
+    </header>
+    <details class="devp" id="devp">
+      <summary>Manual token (optional)</summary>
+      <div class="b">
+        <input id="f-token" placeholder="Moov access token" autocomplete="off" spellcheck="false" />
         <input id="f-acct" placeholder="Account ID" autocomplete="off" spellcheck="false" />
         <input id="f-card" placeholder="Issued card ID (optional)" autocomplete="off" spellcheck="false" />
         <button id="f-go">Use</button>
       </div>
+    </details>
+
+    <div class="scroll">
+      <!-- HOME -->
+      <section class="view" id="v-home">
+        <div class="home">
+          <div class="col">
+            <div class="card" id="homeCard">
+              <span class="froztag">FROZEN</span>
+              <div class="top"><span class="nm">Shuk · Checking</span><span class="brandmark">VISA</span></div>
+              <div class="label">Available balance</div>
+              <div class="bal">$4,820.50</div>
+              <div class="num">•••• &nbsp;•••• &nbsp;•••• &nbsp;7842</div>
+              <div class="foot"><span class="cardName">ISAAC JOSEPH</span><span>09 / 29</span></div>
+            </div>
+            <div class="actions">
+              <button class="act" data-drop="addmoney"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="t">Add money</span></button>
+              <button class="act" data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg><span class="t">Send</span></button>
+              <button class="act" data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M15 17H7V9"/></svg><span class="t">Request</span></button>
+              <button class="act" data-go="card"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg><span class="t">Card</span></button>
+            </div>
+            <div class="block">
+              <h3>Banking</h3>
+              <div class="kv"><span class="k">Account number</span><span class="v">•••• 7890 <button class="ghostbtn" data-copy="1100007890">Copy</button></span></div>
+              <div class="kv"><span class="k">Routing number</span><span class="v">021000021 <button class="ghostbtn" data-copy="021000021">Copy</button></span></div>
+              <span class="badge-ok">FDIC insured via partner bank</span>
+            </div>
+          </div>
+          <div class="col">
+            <div class="block">
+              <h3>Recent activity</h3>
+              <div class="list">
+                <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><div><div class="nm">Deposit · Chase ••1187</div><div class="dt">Today</div></div><div class="amt pos">+$1,200.00</div></div>
+                <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#5b5d6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div><div class="nm">Sunrise Cafe</div><div class="dt">Today · 8:14 AM</div></div><div class="amt neg">−$6.40</div></div>
+                <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#5b5d6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div><div class="nm">Green Leaf Market</div><div class="dt">Yesterday</div></div><div class="amt neg">−$54.18</div></div>
+                <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><div><div class="nm">From David Klein</div><div class="dt">Yesterday</div></div><div class="amt pos">+$40.00</div></div>
+                <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#5b5d6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div><div class="nm">Cohen Hardware</div><div class="dt">Jun 11</div></div><div class="amt neg">−$23.75</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARD -->
+      <section class="view" id="v-card" hidden>
+        <div class="home">
+          <div class="col">
+            <div class="card" id="cardCard">
+              <span class="froztag">FROZEN</span>
+              <div class="top"><span class="nm">Shuk · Debit</span><span class="brandmark">VISA</span></div>
+              <div class="num" style="margin-top:40px">•••• &nbsp;•••• &nbsp;•••• &nbsp;7842</div>
+              <div class="foot"><span class="cardName">ISAAC JOSEPH</span><span>09 / 29 · CVV •••</span></div>
+            </div>
+            <div class="moovbox" id="issuedBox"><div class="note" style="margin:0">Full card details render inside a secure Moov iframe. Add an issued-card ID in Developer, then reveal.</div></div>
+          </div>
+          <div class="col">
+            <div class="block">
+              <h3>Card controls</h3>
+              <div class="btnrow" style="flex-direction:column;margin-top:0">
+                <button class="btn dark block" data-drop="issued">Reveal full card number</button>
+                <button class="btn sub block" data-act="freeze" id="freezeBtn">Freeze card</button>
+                <button class="btn sub block" data-act="applepay">Add to Apple Pay / Google Pay</button>
+                <button class="btn sub block" data-act="replace">Report lost / replace card</button>
+              </div>
+              <p class="note">Issued via Moov card issuing. Numbers are PCI-protected and rendered by Moov.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BANK -->
+      <section class="view" id="v-bank" hidden>
+        <div class="home">
+          <div class="col">
+            <div class="block">
+              <h3>Account details</h3>
+              <div class="kv"><span class="k">Balance</span><span class="v">$4,820.50</span></div>
+              <div class="kv"><span class="k">Account number</span><span class="v">•••• 7890 <button class="ghostbtn" data-copy="1100007890">Copy</button></span></div>
+              <div class="kv"><span class="k">Routing number</span><span class="v">021000021 <button class="ghostbtn" data-copy="021000021">Copy</button></span></div>
+              <div class="kv"><span class="k">Type</span><span class="v">Checking</span></div>
+              <span class="badge-ok">FDIC insured via partner bank</span>
+            </div>
+          </div>
+          <div class="col">
+            <div class="block">
+              <h3>Linked accounts</h3>
+              <div class="list">
+                <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#4a5cf5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></div><div><div class="nm">Chase ••1187</div><div class="dt">Checking · verified</div></div></div>
+              </div>
+              <div class="btnrow"><button class="btn pri block" data-drop="bank">Link a bank account</button></div>
+              <p class="note">Bank accounts &amp; ACH provided by Moov’s partner bank. Linking uses the Moov payment-methods Drop.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MOVE -->
+      <section class="view" id="v-move" hidden>
+        <div class="home">
+          <div class="col">
+            <div class="block">
+              <h3>Move money</h3>
+              <div class="btnrow" style="flex-direction:column;margin-top:0">
+                <button class="btn pri block" data-drop="addmoney">Add money from a bank</button>
+                <button class="btn dark block" data-act="send">Send to a person</button>
+                <button class="btn sub block" data-act="request">Request money</button>
+                <button class="btn sub block" data-drop="cardlink">Link a debit card</button>
+              </div>
+              <p class="note">Send and receive on Moov’s licensed rails — no money transmitter license of your own.</p>
+            </div>
+          </div>
+          <div class="col">
+            <div class="block" id="cardlinkWrap" hidden>
+              <h3>Link a debit card</h3>
+              <form id="cardForm"><moov-card-link id="d-cardlink"></moov-card-link></form>
+              <div class="btnrow"><button class="btn dark" id="cardSubmit">Save card</button><button class="btn sub" data-act="hidecardlink">Cancel</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ACCOUNT -->
+      <section class="view" id="v-account" hidden>
+        <div class="home">
+          <div class="col">
+            <div class="block">
+              <h3>Profile</h3>
+              <div class="kv"><span class="k">Name</span><span class="v" id="accName" style="font-variant-numeric:normal">Isaac Joseph</span></div>
+              <div class="kv"><span class="k">Email</span><span class="v" id="accEmail" style="font-variant-numeric:normal;font-weight:500">—</span></div>
+              <div class="kv"><span class="k">Identity (KYC)</span><span class="v" id="kyc" style="font-variant-numeric:normal;color:#92660a">Unverified</span></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="block">
+              <h3>Manage</h3>
+              <div class="btnrow" style="flex-direction:column;margin-top:0">
+                <button class="btn pri block" data-drop="onboard">Open / verify your account</button>
+                <button class="btn sub block" data-drop="bank">Manage payment methods</button>
+                <button class="btn sub block" data-act="settings">Settings</button>
+                <button class="btn sub block" data-act="signout">Sign out</button>
+              </div>
+              <p class="note">“Open / verify your account” launches Moov’s onboarding Drop — identity &amp; verification for wallet, send/collect and card-issuing. Your details go straight to Moov.</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
-  </details>
 
-  <header>
-    <div class="brand"><span class="mark">S</span><span>Shuk</span></div>
-    <span class="pill pending" id="kyc">Unverified</span>
-  </header>
-
-  <main>
-    <!-- HOME -->
-    <section class="view" id="v-home">
-      <div class="card">
-        <div class="top"><span class="nm">Shuk · Checking</span><span class="brandmark">VISA</span></div>
-        <div class="label">Available balance</div>
-        <div class="bal">$4,820.50</div>
-        <div class="num">•••• &nbsp;•••• &nbsp;•••• &nbsp;7842</div>
-        <div class="foot"><span>ISAAC JOSEPH</span><span>09 / 29</span></div>
-      </div>
-
-      <div class="actions">
-        <button class="act" data-drop="addmoney"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="t">Add money</span></button>
-        <button class="act" data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg><span class="t">Send</span></button>
-        <button class="act" data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M15 17H7V9"/></svg><span class="t">Request</span></button>
-        <button class="act" data-go="card"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg><span class="t">Card</span></button>
-      </div>
-
-      <div class="sec"><span>Recent activity</span></div>
-      <div class="list">
-        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><div><div class="nm">Deposit · Chase ••1187</div><div class="dt">Today</div></div><div class="amt pos">+$1,200.00</div></div>
-        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#5b5d6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div><div class="nm">Sunrise Cafe</div><div class="dt">Today</div></div><div class="amt neg">−$6.40</div></div>
-        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#5b5d6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div><div class="nm">Green Leaf Market</div><div class="dt">Yesterday</div></div><div class="amt neg">−$54.18</div></div>
-        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><div><div class="nm">From David Klein</div><div class="dt">Yesterday</div></div><div class="amt pos">+$40.00</div></div>
-      </div>
-    </section>
-
-    <!-- CARD -->
-    <section class="view" id="v-card" hidden>
-      <div class="ptitle">Card</div>
-      <div class="card">
-        <div class="top"><span class="nm">Shuk · Debit</span><span class="brandmark">VISA</span></div>
-        <div class="num" style="margin-top:36px">•••• &nbsp;•••• &nbsp;•••• &nbsp;7842</div>
-        <div class="foot"><span>ISAAC JOSEPH</span><span>09 / 29 · CVV •••</span></div>
-      </div>
-      <div class="stack">
-        <button class="btn dark" data-drop="issued">Reveal full card number</button>
-        <button class="btn sub">Freeze card</button>
-        <button class="btn sub">Add to Apple Pay / Google Pay</button>
-      </div>
-      <div class="moovbox" id="issuedBox"><div class="note">Card details render inside a secure Moov iframe. Add an issued-card ID in Developer, then reveal.</div></div>
-      <p class="note">Issued via Moov card issuing. Numbers are PCI-protected and rendered by Moov.</p>
-    </section>
-
-    <!-- BANK -->
-    <section class="view" id="v-bank" hidden>
-      <div class="ptitle">Banking</div>
-      <div class="panel">
-        <div class="kv"><span class="k">Balance</span><span class="v">$4,820.50</span></div>
-        <div class="kv"><span class="k">Account number</span><span class="v">•••• 7890 <button class="ghostbtn" data-copy="1100007890">Copy</button></span></div>
-        <div class="kv"><span class="k">Routing number</span><span class="v">021000021 <button class="ghostbtn" data-copy="021000021">Copy</button></span></div>
-      </div>
-      <div style="margin-top:12px"><span class="badge-ok">FDIC insured via partner bank</span></div>
-      <div class="sec"><span>Linked accounts</span></div>
-      <div class="list">
-        <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#4a5cf5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></div><div><div class="nm">Chase ••1187</div><div class="dt">Checking · verified</div></div></div>
-      </div>
-      <div class="stack"><button class="btn pri" data-drop="bank">Link a bank account</button></div>
-      <p class="note">Bank accounts &amp; ACH provided by Moov’s partner bank. Linking uses the Moov payment-methods Drop.</p>
-    </section>
-
-    <!-- MOVE -->
-    <section class="view" id="v-move" hidden>
-      <div class="ptitle">Move money</div>
-      <div class="stack">
-        <button class="btn pri" data-drop="addmoney">Add money from a bank</button>
-        <button class="btn dark">Send to a person</button>
-        <button class="btn sub">Request money</button>
-        <button class="btn sub" data-drop="cardlink">Link a card</button>
-      </div>
-      <div class="moovbox" id="cardlinkBox" hidden>
-        <form id="cardForm"><moov-card-link id="d-cardlink"></moov-card-link></form>
-        <button class="btn dark" id="cardSubmit" style="margin-top:10px">Save card</button>
-      </div>
-      <p class="note">Send and receive on Moov’s licensed rails — no money transmitter license of your own.</p>
-    </section>
-
-    <!-- ACCOUNT -->
-    <section class="view" id="v-account" hidden>
-      <div class="ptitle">Account</div>
-      <div class="panel">
-        <div class="kv"><span class="k">Name</span><span class="v" style="font-variant-numeric:normal">Isaac Joseph</span></div>
-        <div class="kv"><span class="k">Email</span><span class="v" style="font-variant-numeric:normal;font-weight:500">ij5009518@gmail.com</span></div>
-        <div class="kv"><span class="k">Identity (KYC)</span><span class="v" id="kyc2" style="font-variant-numeric:normal;color:#92660a">Unverified</span></div>
-      </div>
-      <div class="stack">
-        <button class="btn pri" data-drop="onboard">Open / verify your account</button>
-        <button class="btn sub" data-drop="bank">Manage payment methods</button>
-        <button class="btn sub">Settings</button>
-      </div>
-      <p class="note">“Open / verify your account” launches Moov’s onboarding Drop — identity &amp; verification for wallet, send/collect, and card-issuing. PII goes straight to Moov.</p>
-    </section>
-  </main>
-
-  <nav>
-    <button class="on" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Home</button>
-    <button data-go="card"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>Card</button>
-    <button data-go="bank"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>Bank</button>
-    <button data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l-4 4 4 4M3 14h12M17 14l4-4-4-4M21 10H9"/></svg>Move</button>
-    <button data-go="account"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Account</button>
-  </nav>
-
-  <div class="toast" id="toast"></div>
+    <div class="mobnav">
+      <button class="on" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Home</button>
+      <button data-go="card"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>Card</button>
+      <button data-go="bank"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>Bank</button>
+      <button data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l-4 4 4 4M3 14h12M17 14l4-4-4-4M21 10H9"/></svg>Move</button>
+      <button data-go="account"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Account</button>
+    </div>
+  </div>
 </div>
+
+<!-- Drop chrome -->
+<div id="backdrop"></div>
+<button id="dropClose"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Close</button>
 
 <!-- Moov Drops -->
 <moov-onboarding id="d-onboard"></moov-onboarding>
 <moov-payment-methods id="d-pm"></moov-payment-methods>
 <moov-issued-card id="d-issued" hidden></moov-issued-card>
 
+<div class="toast" id="toast"></div>
+
 <script>
-  const state = { token:"", acct:"", card:"" };
+  const state = { token:"", acct:"", card:"", frozen:false };
   const $ = (id) => document.getElementById(id);
+  const titles = { home:"Home", card:"Card", bank:"Banking", move:"Move money", account:"Account" };
   function moovReady(){ return window.customElements && window.customElements.get("moov-onboarding"); }
   function toast(m){ const t=$("toast"); t.textContent=m; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",3600); }
-  function setConnected(on,msg){ $("dot").className="dot"+(on?" on":""); $("statusText").textContent=msg; if(on){ $("kyc").textContent="Verified"; $("kyc").className="pill ok"; $("kyc2").textContent="Verified"; $("kyc2").style.color="#15803d"; } }
+  function setConnected(on,msg){ $("dot").className="dot"+(on?" on":""); $("statusText").textContent=msg; if(on){ $("kyc").textContent="Verified"; $("kyc").style.color="#15803d"; } }
 
+  /* ---- Auth ---- */
+  function deriveName(email){ const p=(email||"").split("@")[0].replace(/[._]/g," ").trim(); if(!p) return "Member"; return p.replace(/\b\w/g,c=>c.toUpperCase()); }
+  function initials(name){ const w=name.trim().split(/\s+/); return ((w[0]||"")[0]||"")+((w[1]||"")[0]||""); }
+  function signIn(email){
+    try{ localStorage.setItem("shuk_email", email); }catch(e){}
+    const name = (email.toLowerCase()==="ij5009518@gmail.com") ? "Isaac Joseph" : deriveName(email);
+    $("auth").style.display="none"; $("shell").style.display="flex";
+    $("sideName").textContent=name; $("sideEmail").textContent=email; $("avatar").textContent=initials(name).toUpperCase()||"M";
+    $("accName").textContent=name; $("accEmail").textContent=email;
+    document.querySelectorAll(".cardName").forEach(e=>e.textContent=name.toUpperCase());
+  }
+  function signOut(){ try{ localStorage.removeItem("shuk_email"); }catch(e){} closeDrops(); $("shell").style.display="none"; $("auth").style.display="grid"; }
+  $("signinBtn").addEventListener("click",()=>{ const e=$("signinEmail").value.trim(); if(!e||!/.+@.+\..+/.test(e)){ toast("Enter a valid email."); return; } signIn(e); });
+  $("signinEmail").addEventListener("keydown",e=>{ if(e.key==="Enter") $("signinBtn").click(); });
+  $("signoutBtn").addEventListener("click", signOut);
+
+  /* ---- Moov token ---- */
   async function getToken(accountId){
     const r = await fetch("/api/moov-token", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(accountId?{accountId}:{}) });
     return r.json();
   }
-
   function configureDrops(){
     if(!moovReady()) return;
     const onboard=$("d-onboard");
-    onboard.facilitatorAccountID = state.acct;
-    onboard.token = state.token;
-    onboard.capabilities = ["wallet.balance","send-funds","collect-funds","card-issuing"];
-    onboard.accountTypes = ["individual","business"];
-    onboard.showLogo = false;
-    // Critical fix for the "loading forever" step: as onboarding creates the
-    // account, re-mint a token scoped to that new account so the next steps load.
-    onboard.onResourceCreated = async ({ resourceType, resource }) => {
-      try {
-        if (resourceType === "account" && resource && resource.accountID) {
-          const d = await getToken(resource.accountID);
-          if (d && d.token) onboard.token = d.token;
-        }
-      } catch(e){}
-    };
-    onboard.onSuccess = ()=>{ toast("Account verified."); setConnected(true,"Verified with Moov"); };
-    onboard.onError = (e)=>toast("Onboarding error: "+((e&&e.message)||e));
+    onboard.facilitatorAccountID=state.acct; onboard.token=state.token;
+    onboard.capabilities=["wallet.balance","send-funds","collect-funds","card-issuing"];
+    onboard.accountTypes=["individual","business"]; onboard.showLogo=false;
+    onboard.onResourceCreated=async ({resourceType,resource})=>{ try{ if(resourceType==="account"&&resource&&resource.accountID){ const d=await getToken(resource.accountID); if(d&&d.token) onboard.token=d.token; } }catch(e){} };
+    onboard.onSuccess=()=>{ closeDrops(); toast("Account verified."); setConnected(true,"Verified with Moov"); };
+    onboard.onCancel=()=>closeDrops(); onboard.onClose=()=>closeDrops();
+    onboard.onError=(e)=>toast("Onboarding error: "+((e&&e.message)||e));
 
-    const pm=$("d-pm");
-    pm.token=state.token; pm.accountID=state.acct;
-    pm.onSuccess=()=>toast("Payment method linked.");
+    const pm=$("d-pm"); pm.token=state.token; pm.accountID=state.acct;
+    pm.onSuccess=()=>{ closeDrops(); toast("Payment method linked."); };
+    pm.onCancel=()=>closeDrops(); pm.onClose=()=>closeDrops();
     pm.onError=(e)=>toast("Link error: "+((e&&(e.error&&e.error.message||e.message))||e));
 
-    const ic=$("d-issued");
-    ic.oauthToken=state.token; ic.accountID=state.acct;
-    if(state.card) ic.issuedCardID=state.card;
-
-    const cl=$("d-cardlink");
-    if(cl){ cl.oauthToken=state.token; cl.accountID=state.acct; cl.onSuccess=()=>toast("Card saved."); cl.onError=(c,a)=>toast("Card error: "+(c||(a&&a.error)||"")); }
+    const ic=$("d-issued"); ic.oauthToken=state.token; ic.accountID=state.acct; if(state.card) ic.issuedCardID=state.card;
+    const cl=$("d-cardlink"); if(cl){ cl.oauthToken=state.token; cl.accountID=state.acct; cl.onSuccess=()=>toast("Card saved."); cl.onError=(c,a)=>toast("Card error: "+(c||(a&&a.error)||"")); }
   }
-
   function needConn(){ if(!state.token||!state.acct){ toast("Still connecting to Moov…"); return true; } return false; }
 
+  /* ---- Drop open / close ---- */
+  function showChrome(){ $("backdrop").style.display="block"; $("dropClose").style.display="flex"; }
+  function closeDrops(){
+    ["d-onboard","d-pm","d-issued"].forEach(id=>{ const el=$(id); if(el) try{ el.open=false; }catch(e){} });
+    $("backdrop").style.display="none"; $("dropClose").style.display="none";
+  }
+  $("dropClose").addEventListener("click", closeDrops);
+  $("backdrop").addEventListener("click", closeDrops);
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeDrops(); });
+
+  /* ---- Navigation ---- */
+  function go(v){
+    document.querySelectorAll(".view").forEach(s=>s.hidden=(s.id!=="v-"+v));
+    document.querySelectorAll("[data-go]").forEach(b=>b.classList.toggle("on", b.getAttribute("data-go")===v));
+    $("pageTitle").textContent=titles[v]||"Shuk"; $("scroll")&&0; document.querySelector(".scroll").scrollTo(0,0);
+  }
+
+  /* ---- Global click handling: every button does something ---- */
   document.body.addEventListener("click",(e)=>{
-    const d=e.target.closest("[data-drop]");
-    if(d){
-      const k=d.getAttribute("data-drop");
-      if(k==="onboard"){ if(needConn())return; $("d-onboard").open=true; }
-      else if(k==="bank"){ if(needConn())return; const pm=$("d-pm"); pm.paymentMethodTypes=["bankAccount","card"]; pm.open=true; }
-      else if(k==="addmoney"){ if(needConn())return; const pm=$("d-pm"); pm.paymentMethodTypes=["bankAccount"]; pm.open=true; }
+    const drop=e.target.closest("[data-drop]");
+    if(drop){
+      const k=drop.getAttribute("data-drop");
+      if(k==="onboard"){ if(needConn())return; $("d-onboard").open=true; showChrome(); }
+      else if(k==="bank"){ if(needConn())return; const pm=$("d-pm"); pm.paymentMethodTypes=["bankAccount","card"]; pm.open=true; showChrome(); }
+      else if(k==="addmoney"){ if(needConn())return; const pm=$("d-pm"); pm.paymentMethodTypes=["bankAccount"]; pm.open=true; showChrome(); }
       else if(k==="issued"){ if(needConn())return; const box=$("issuedBox"), ic=$("d-issued"); ic.hidden=false; box.innerHTML=""; box.appendChild(ic); if(!state.card) toast("Add an issued-card ID in Developer to load real details."); }
-      else if(k==="cardlink"){ if(needConn())return; $("cardlinkBox").hidden=false; }
+      else if(k==="cardlink"){ if(needConn())return; go("move"); $("cardlinkWrap").hidden=false; }
       return;
     }
-    const g=e.target.closest("[data-go]");
-    if(g){ const v=g.getAttribute("data-go"); document.querySelectorAll(".view").forEach(s=>s.hidden=(s.id!=="v-"+v)); document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on", b.getAttribute("data-go")===v)); document.querySelector("main").scrollTo(0,0); return; }
-    const c=e.target.closest("[data-copy]");
-    if(c){ navigator.clipboard&&navigator.clipboard.writeText(c.getAttribute("data-copy")); toast("Copied"); }
+    const nav=e.target.closest("[data-go]"); if(nav){ go(nav.getAttribute("data-go")); return; }
+    const cp=e.target.closest("[data-copy]"); if(cp){ navigator.clipboard&&navigator.clipboard.writeText(cp.getAttribute("data-copy")); toast("Copied to clipboard"); return; }
+    const act=e.target.closest("[data-act]");
+    if(act){
+      const a=act.getAttribute("data-act");
+      if(a==="freeze"){ state.frozen=!state.frozen; $("homeCard").classList.toggle("frozen",state.frozen); $("cardCard").classList.toggle("frozen",state.frozen); $("freezeBtn").textContent=state.frozen?"Unfreeze card":"Freeze card"; toast(state.frozen?"Card frozen — purchases declined.":"Card unfrozen."); }
+      else if(a==="applepay") toast("In a live build this adds your card to the device wallet via Moov.");
+      else if(a==="replace") toast("Replacement requested — a new card would be issued via Moov.");
+      else if(a==="send") toast("Peer send runs on Moov rails. Connect a recipient to enable.");
+      else if(a==="request") toast("A payment request link would be generated via Moov.");
+      else if(a==="settings") go("account");
+      else if(a==="signout") signOut();
+      else if(a==="hidecardlink") $("cardlinkWrap").hidden=true;
+      return;
+    }
   });
-  const csb=$("cardSubmit"); if(csb) csb.addEventListener("click",()=>{ const cl=$("d-cardlink"); if(cl&&cl.submit) cl.submit(); });
+  $("cardSubmit").addEventListener("click",()=>{ const cl=$("d-cardlink"); if(cl&&cl.submit) cl.submit(); else toast("Card form not ready yet."); });
 
-  $("f-go").addEventListener("click",()=>{
-    state.token=$("f-token").value.trim(); state.acct=$("f-acct").value.trim(); state.card=$("f-card").value.trim();
-    if(state.token&&state.acct){ setConnected(true,"Connected (manual token)"); configureDrops(); toast("Connected."); }
-  });
+  /* ---- Developer panel ---- */
+  $("devToggle").addEventListener("click",()=>{ $("devp").open=!$("devp").open; });
+  $("f-go").addEventListener("click",()=>{ state.token=$("f-token").value.trim(); state.acct=$("f-acct").value.trim(); state.card=$("f-card").value.trim(); if(state.token&&state.acct){ setConnected(true,"Connected (manual token)"); configureDrops(); toast("Connected."); } });
 
+  /* ---- Auto-connect ---- */
   async function autoConnect(){
-    try {
-      const d = await getToken();
-      if(d&&d.needsKeys){ setConnected(false,"Add Moov keys in Vercel to go live"); return; }
+    try{
+      const d=await getToken();
+      if(d&&d.needsKeys){ setConnected(false,"Add Moov keys in Vercel"); return; }
       if(d&&d.token&&d.accountId){ state.token=d.token; state.acct=d.accountId; $("f-acct").value=d.accountId; setConnected(true,"Connected to Moov"); configureDrops(); }
-      else if(d&&d.error){ setConnected(false,"Moov: "+(typeof d.error==="string"?d.error:JSON.stringify(d.error)).slice(0,120)); }
-    } catch(e){ setConnected(false,"Open developer to paste a token"); }
+      else if(d&&d.error){ setConnected(false,"Moov: "+(typeof d.error==="string"?d.error:JSON.stringify(d.error)).slice(0,90)); }
+    }catch(e){ setConnected(false,"Offline — paste a token in Developer"); }
   }
-  (function w(){ if(moovReady()){ autoConnect(); return; } setTimeout(w,250); })();
+
+  /* ---- Boot ---- */
+  (function boot(){
+    let saved=""; try{ saved=localStorage.getItem("shuk_email")||""; }catch(e){}
+    if(saved) signIn(saved); else $("signinEmail").focus();
+    (function w(){ if(moovReady()){ autoConnect(); return; } setTimeout(w,250); })();
+  })();
 </script>
 </body>
 </html>
