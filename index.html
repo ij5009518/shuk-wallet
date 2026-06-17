@@ -122,6 +122,10 @@
   .btn.dark { background: var(--ink); color: #fff; } .btn.dark:hover { opacity: .9; }
   .btn.sub { background: #fff; color: var(--ink); border: 1px solid var(--line); } .btn.sub:hover { background: var(--surface); }
   .btn.block { width: 100%; }
+  .flabel { font-size: 12.5px; font-weight: 600; color: #3b3d49; display: block; margin-top: 4px; }
+  .fld { width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: 11px; font-size: 14px; margin: 5px 0 12px; }
+  .fld:focus { outline: none; border-color: var(--accent); }
+  .linkbox { background: var(--surface); border: 1px solid var(--line); border-radius: 11px; padding: 11px 13px; font-size: 13px; word-break: break-all; margin-top: 12px; color: var(--accent); font-weight: 600; }
   .note { font-size: 12px; color: var(--muted); line-height: 1.65; margin-top: 14px; }
   .moovbox { margin-top: 16px; border: 1px solid var(--line); border-radius: 14px; padding: 12px; min-height: 56px; background: var(--surface); }
 
@@ -217,7 +221,7 @@
               <span class="froztag">FROZEN</span>
               <div class="top"><span class="nm">Shuk · Checking</span><span class="brandmark">VISA</span></div>
               <div class="label">Available balance</div>
-              <div class="bal">$4,820.50</div>
+              <div class="bal" data-bal>$4,820.50</div>
               <div class="num">•••• &nbsp;•••• &nbsp;•••• &nbsp;7842</div>
               <div class="foot"><span class="cardName">MEMBER</span><span>09 / 29</span></div>
             </div>
@@ -237,7 +241,7 @@
           <div class="col">
             <div class="block">
               <h3>Recent activity</h3>
-              <div class="list">
+              <div class="list" id="actList">
                 <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><div><div class="nm">Deposit · Chase ••1187</div><div class="dt">Today</div></div><div class="amt pos">+$1,200.00</div></div>
                 <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#5b5d6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div><div class="nm">Sunrise Cafe</div><div class="dt">Today · 8:14 AM</div></div><div class="amt neg">−$6.40</div></div>
                 <div class="row"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#5b5d6a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div><div class="nm">Green Leaf Market</div><div class="dt">Yesterday</div></div><div class="amt neg">−$54.18</div></div>
@@ -282,7 +286,7 @@
           <div class="col">
             <div class="block">
               <h3>Account details</h3>
-              <div class="kv"><span class="k">Balance</span><span class="v">$4,820.50</span></div>
+              <div class="kv"><span class="k">Balance</span><span class="v" data-bal>$4,820.50</span></div>
               <div class="kv"><span class="k">Account number</span><span class="v">•••• 7890 <button class="ghostbtn" data-copy="1100007890">Copy</button></span></div>
               <div class="kv"><span class="k">Routing number</span><span class="v">021000021 <button class="ghostbtn" data-copy="021000021">Copy</button></span></div>
               <div class="kv"><span class="k">Type</span><span class="v">Checking</span></div>
@@ -322,6 +326,31 @@
               <h3>Link a debit card</h3>
               <form id="cardForm"><moov-card-link id="d-cardlink"></moov-card-link></form>
               <div class="btnrow"><button class="btn dark" id="cardSubmit">Save card</button><button class="btn sub" data-act="hidecardlink">Cancel</button></div>
+            </div>
+            <div class="block" id="sendPanel" hidden>
+              <h3>Send money</h3>
+              <label class="flabel">To (name, email or phone)</label>
+              <input class="fld" id="sendTo" placeholder="Sarah Levin" autocomplete="off" />
+              <label class="flabel">Amount</label>
+              <input class="fld" id="sendAmt" type="number" min="0" step="0.01" placeholder="0.00" />
+              <label class="flabel">Note (optional)</label>
+              <input class="fld" id="sendNote" placeholder="Dinner last night" autocomplete="off" />
+              <div class="btnrow"><button class="btn pri" id="sendBtn">Send money</button><button class="btn sub" data-act="hideSend">Cancel</button></div>
+              <p class="note" style="margin-top:12px">In production this is a Moov transfer on licensed rails. Here it moves against your demo balance and logs to activity.</p>
+            </div>
+            <div class="block" id="requestPanel" hidden>
+              <h3>Request money</h3>
+              <label class="flabel">From (name, email or phone)</label>
+              <input class="fld" id="reqFrom" placeholder="David Klein" autocomplete="off" />
+              <label class="flabel">Amount</label>
+              <input class="fld" id="reqAmt" type="number" min="0" step="0.01" placeholder="0.00" />
+              <label class="flabel">Note (optional)</label>
+              <input class="fld" id="reqNote" placeholder="Your share of groceries" autocomplete="off" />
+              <div class="btnrow"><button class="btn pri" id="reqBtn">Create request link</button><button class="btn sub" data-act="hideRequest">Cancel</button></div>
+              <div id="reqResult" hidden>
+                <div class="linkbox" id="reqLink"></div>
+                <div class="btnrow"><button class="btn dark" data-act="copyReq">Copy link</button></div>
+              </div>
             </div>
           </div>
         </div>
@@ -421,7 +450,17 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const state = { token:"", acct:"", card:"", frozen:false };
+  const state = { token:"", acct:"", card:"", frozen:false, balanceCents:482050 };
+  function fmtMoney(c){ return "$"+(c/100).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function renderBalance(){ document.querySelectorAll("[data-bal]").forEach(e=>e.textContent=fmtMoney(state.balanceCents)); }
+  function prependActivity(name, cents, sub){
+    const list=document.getElementById("actList"); if(!list) return;
+    const pos=cents>0, stroke=pos?"#16a34a":"#5b5d6a";
+    const arrow=pos?'<path d="M12 5v14M5 12l7 7 7-7"/>':'<path d="M12 19V5M5 12l7-7 7 7"/>';
+    const row=document.createElement("div"); row.className="row";
+    row.innerHTML='<div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+arrow+'</svg></div><div><div class="nm">'+name+'</div><div class="dt">'+(sub||"Just now")+'</div></div><div class="amt '+(pos?"pos":"neg")+'">'+(pos?"+":"−")+fmtMoney(Math.abs(cents))+'</div>';
+    list.insertBefore(row, list.firstChild);
+  }
   const $ = (id) => document.getElementById(id);
   const titles = { home:"Home", card:"Card", bank:"Banking", move:"Move money", drops:"Moov Drops", account:"Account" };
   let clerkActive = false, connectStarted = false;
@@ -437,6 +476,7 @@
     if(avatarUrl){ $("avatar").innerHTML='<img src="'+avatarUrl+'" alt="">'; } else { $("avatar").textContent=initials(name).toUpperCase(); }
     $("accName").textContent=name; $("accEmail").textContent=email||"";
     document.querySelectorAll(".cardName").forEach(e=>e.textContent=(name||"Member").toUpperCase());
+    renderBalance();
     if(!connectStarted){ connectStarted=true; waitMoovThenConnect(); }
   }
   function showGate(){ $("shell").style.display="none"; $("auth").style.display="grid"; }
@@ -549,8 +589,11 @@
       if(a==="freeze"){ state.frozen=!state.frozen; $("homeCard").classList.toggle("frozen",state.frozen); $("cardCard").classList.toggle("frozen",state.frozen); $("freezeBtn").textContent=state.frozen?"Unfreeze card":"Freeze card"; toast(state.frozen?"Card frozen — purchases declined.":"Card unfrozen."); }
       else if(a==="applepay") toast("In a live build this adds your card to the device wallet via Moov.");
       else if(a==="replace") toast("Replacement requested — a new card would be issued via Moov.");
-      else if(a==="send"){ toast("Sending money uses Moov’s Transfers API — there’s no pre-built Drop for it. Link a funding source first."); const pm=$("d-pm"); if(state.token&&state.acct){ pm.paymentMethodTypes=["bankAccount","card"]; pm.open=true; showChrome(); } }
-      else if(a==="request") toast("Requesting money uses Moov Payment Links (a hosted page), not a Drop. See the Moov Drops tab for the real Drops.");
+      else if(a==="send"){ go("move"); $("cardlinkWrap").hidden=true; $("requestPanel").hidden=true; $("sendPanel").hidden=false; $("sendTo").focus(); }
+      else if(a==="request"){ go("move"); $("cardlinkWrap").hidden=true; $("sendPanel").hidden=true; $("requestPanel").hidden=false; $("reqFrom").focus(); }
+      else if(a==="hideSend") $("sendPanel").hidden=true;
+      else if(a==="hideRequest"){ $("requestPanel").hidden=true; $("reqResult").hidden=true; }
+      else if(a==="copyReq"){ if(window._reqLink){ navigator.clipboard&&navigator.clipboard.writeText(window._reqLink); toast("Request link copied."); } }
       else if(a==="goCardlink"){ go("move"); $("cardlinkWrap").hidden=false; }
       else if(a==="goIssued"){ go("card"); const box=$("issuedBox"), ic=$("d-issued"); ic.hidden=false; box.innerHTML=""; box.appendChild(ic); if(!state.card) toast("Add an issued-card ID in Developer to load real details."); }
       else if(a==="acceptTos"){ if(window._tosToken) toast("Terms accepted — agreement token ready to patch to the account."); else toast("Review the terms above first."); }
@@ -561,6 +604,29 @@
     }
   });
   $("cardSubmit").addEventListener("click",()=>{ const cl=$("d-cardlink"); if(cl&&cl.submit) cl.submit(); else toast("Card form not ready yet."); });
+
+  $("sendBtn").addEventListener("click",()=>{
+    const to=$("sendTo").value.trim();
+    const amt=Math.round(parseFloat($("sendAmt").value)*100);
+    if(!to){ toast("Enter who you’re sending to."); return; }
+    if(!amt||amt<=0){ toast("Enter a valid amount."); return; }
+    if(amt>state.balanceCents){ toast("That’s more than your available balance ("+fmtMoney(state.balanceCents)+")."); return; }
+    state.balanceCents-=amt; renderBalance();
+    prependActivity("To "+to, -amt, ($("sendNote").value.trim()||"Sent")+" · just now");
+    toast("Sent "+fmtMoney(amt)+" to "+to+".");
+    $("sendTo").value=""; $("sendAmt").value=""; $("sendNote").value=""; $("sendPanel").hidden=true; go("home");
+  });
+
+  $("reqBtn").addEventListener("click",()=>{
+    const from=$("reqFrom").value.trim();
+    const amtv=parseFloat($("reqAmt").value);
+    if(!from){ toast("Enter who you’re requesting from."); return; }
+    if(!amtv||amtv<=0){ toast("Enter a valid amount."); return; }
+    const id=Math.random().toString(36).slice(2,8);
+    const link=location.origin+"/pay?to=shuk&from="+encodeURIComponent(from)+"&amt="+amtv.toFixed(2)+"&id="+id;
+    window._reqLink=link; $("reqLink").textContent=link; $("reqResult").hidden=false;
+    toast("Payment request link created for "+from+".");
+  });
 
   $("devToggle").addEventListener("click",()=>{ $("devp").open=!$("devp").open; });
   $("f-go").addEventListener("click",()=>{ state.token=$("f-token").value.trim(); state.acct=$("f-acct").value.trim(); state.card=$("f-card").value.trim(); if(state.token&&state.acct){ setConnected(true,"Connected (manual token)"); configureDrops(); toast("Connected."); } });
