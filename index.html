@@ -125,7 +125,12 @@
   .flabel { font-size: 12.5px; font-weight: 600; color: #3b3d49; display: block; margin-top: 4px; }
   .fld { width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: 11px; font-size: 14px; margin: 5px 0 12px; }
   .fld:focus { outline: none; border-color: var(--accent); }
-  .linkbox { background: var(--surface); border: 1px solid var(--line); border-radius: 11px; padding: 11px 13px; font-size: 13px; word-break: break-all; margin-top: 12px; color: var(--accent); font-weight: 600; }
+  .linkbox { background: var(--surface); border: 1px solid var(--line); border-radius: 11px; padding: 11px 13px; font-size: 13px; word-break: break-all; margin-top: 8px; color: var(--accent); font-weight: 600; }
+  .sheet { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); width: min(420px, 92vw); max-height: 90vh; overflow: auto; background: #fff; border-radius: 18px; padding: 24px; box-shadow: 0 30px 70px -24px rgba(0,0,0,.55); z-index: 2147483600; }
+  .sheettop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .sheettop h3 { margin: 0; font-size: 18px; font-weight: 800; }
+  .xbtn { background: var(--surface); border: 1px solid var(--line); border-radius: 9px; width: 30px; height: 30px; font-size: 14px; color: var(--muted); }
+  .xbtn:hover { background: var(--surface2); }
   .note { font-size: 12px; color: var(--muted); line-height: 1.65; margin-top: 14px; }
   .moovbox { margin-top: 16px; border: 1px solid var(--line); border-radius: 14px; padding: 12px; min-height: 56px; background: var(--surface); }
 
@@ -227,8 +232,8 @@
             </div>
             <div class="actions">
               <button class="act" data-drop="addmoney"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span class="t">Add money</span></button>
-              <button class="act" data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg><span class="t">Send</span></button>
-              <button class="act" data-go="move"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M15 17H7V9"/></svg><span class="t">Request</span></button>
+              <button class="act" data-act="send"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg><span class="t">Send</span></button>
+              <button class="act" data-act="request"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M15 17H7V9"/></svg><span class="t">Request</span></button>
               <button class="act" data-go="card"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg><span class="t">Card</span></button>
             </div>
             <div class="block">
@@ -327,31 +332,6 @@
               <form id="cardForm"><moov-card-link id="d-cardlink"></moov-card-link></form>
               <div class="btnrow"><button class="btn dark" id="cardSubmit">Save card</button><button class="btn sub" data-act="hidecardlink">Cancel</button></div>
             </div>
-            <div class="block" id="sendPanel" hidden>
-              <h3>Send money</h3>
-              <label class="flabel">To (name, email or phone)</label>
-              <input class="fld" id="sendTo" placeholder="Sarah Levin" autocomplete="off" />
-              <label class="flabel">Amount</label>
-              <input class="fld" id="sendAmt" type="number" min="0" step="0.01" placeholder="0.00" />
-              <label class="flabel">Note (optional)</label>
-              <input class="fld" id="sendNote" placeholder="Dinner last night" autocomplete="off" />
-              <div class="btnrow"><button class="btn pri" id="sendBtn">Send money</button><button class="btn sub" data-act="hideSend">Cancel</button></div>
-              <p class="note" style="margin-top:12px">In production this is a Moov transfer on licensed rails. Here it moves against your demo balance and logs to activity.</p>
-            </div>
-            <div class="block" id="requestPanel" hidden>
-              <h3>Request money</h3>
-              <label class="flabel">From (name, email or phone)</label>
-              <input class="fld" id="reqFrom" placeholder="David Klein" autocomplete="off" />
-              <label class="flabel">Amount</label>
-              <input class="fld" id="reqAmt" type="number" min="0" step="0.01" placeholder="0.00" />
-              <label class="flabel">Note (optional)</label>
-              <input class="fld" id="reqNote" placeholder="Your share of groceries" autocomplete="off" />
-              <div class="btnrow"><button class="btn pri" id="reqBtn">Create request link</button><button class="btn sub" data-act="hideRequest">Cancel</button></div>
-              <div id="reqResult" hidden>
-                <div class="linkbox" id="reqLink"></div>
-                <div class="btnrow"><button class="btn dark" data-act="copyReq">Copy link</button></div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -441,6 +421,34 @@
 
 <div id="backdrop"></div>
 <button id="dropClose"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Close</button>
+
+<!-- Send / Request pop-ups (top-level so they open from anywhere) -->
+<div class="sheet" id="sendPanel" hidden>
+  <div class="sheettop"><h3>Send money</h3><button class="xbtn" data-act="hideSend">✕</button></div>
+  <label class="flabel">To (name, email or phone)</label>
+  <input class="fld" id="sendTo" placeholder="Sarah Levin" autocomplete="off" />
+  <label class="flabel">Amount</label>
+  <input class="fld" id="sendAmt" type="number" min="0" step="0.01" placeholder="0.00" />
+  <label class="flabel">Note (optional)</label>
+  <input class="fld" id="sendNote" placeholder="Dinner last night" autocomplete="off" />
+  <button class="btn pri block" id="sendBtn">Send money</button>
+  <p class="note" style="margin-top:12px">In production this is a Moov transfer on licensed rails. Here it moves against your demo balance and logs to activity.</p>
+</div>
+<div class="sheet" id="requestPanel" hidden>
+  <div class="sheettop"><h3>Request money</h3><button class="xbtn" data-act="hideRequest">✕</button></div>
+  <label class="flabel">From (name, email or phone)</label>
+  <input class="fld" id="reqFrom" placeholder="David Klein" autocomplete="off" />
+  <label class="flabel">Amount</label>
+  <input class="fld" id="reqAmt" type="number" min="0" step="0.01" placeholder="0.00" />
+  <label class="flabel">Note (optional)</label>
+  <input class="fld" id="reqNote" placeholder="Your share of groceries" autocomplete="off" />
+  <button class="btn pri block" id="reqBtn">Create request link</button>
+  <div id="reqResult" hidden style="margin-top:14px">
+    <div class="flabel">Share this link to get paid:</div>
+    <div class="linkbox" id="reqLink"></div>
+    <button class="btn dark block" data-act="copyReq" style="margin-top:10px">Copy link</button>
+  </div>
+</div>
 
 <moov-onboarding id="d-onboard"></moov-onboarding>
 <moov-payment-methods id="d-pm"></moov-payment-methods>
@@ -558,9 +566,12 @@
 
   function showChrome(){ $("backdrop").style.display="block"; $("dropClose").style.display="flex"; }
   function closeDrops(){ ["d-onboard","d-pm","d-issued","d-fileupload"].forEach(id=>{ const el=$(id); if(el) try{ el.open=false; }catch(e){} }); $("backdrop").style.display="none"; $("dropClose").style.display="none"; }
-  $("dropClose").addEventListener("click", closeDrops);
-  $("backdrop").addEventListener("click", closeDrops);
-  document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeDrops(); });
+  function openSheet(id){ document.querySelectorAll(".sheet").forEach(s=>s.hidden=true); $(id).hidden=false; $("backdrop").style.display="block"; }
+  function closeSheets(){ document.querySelectorAll(".sheet").forEach(s=>s.hidden=true); const rr=$("reqResult"); if(rr) rr.hidden=true; $("backdrop").style.display="none"; }
+  function closeAll(){ closeSheets(); closeDrops(); }
+  $("dropClose").addEventListener("click", closeAll);
+  $("backdrop").addEventListener("click", closeAll);
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeAll(); });
 
   function go(v){
     document.querySelectorAll(".view").forEach(s=>s.hidden=(s.id!=="v-"+v));
@@ -589,10 +600,10 @@
       if(a==="freeze"){ state.frozen=!state.frozen; $("homeCard").classList.toggle("frozen",state.frozen); $("cardCard").classList.toggle("frozen",state.frozen); $("freezeBtn").textContent=state.frozen?"Unfreeze card":"Freeze card"; toast(state.frozen?"Card frozen — purchases declined.":"Card unfrozen."); }
       else if(a==="applepay") toast("In a live build this adds your card to the device wallet via Moov.");
       else if(a==="replace") toast("Replacement requested — a new card would be issued via Moov.");
-      else if(a==="send"){ go("move"); $("cardlinkWrap").hidden=true; $("requestPanel").hidden=true; $("sendPanel").hidden=false; $("sendTo").focus(); }
-      else if(a==="request"){ go("move"); $("cardlinkWrap").hidden=true; $("sendPanel").hidden=true; $("requestPanel").hidden=false; $("reqFrom").focus(); }
-      else if(a==="hideSend") $("sendPanel").hidden=true;
-      else if(a==="hideRequest"){ $("requestPanel").hidden=true; $("reqResult").hidden=true; }
+      else if(a==="send"){ openSheet("sendPanel"); setTimeout(()=>$("sendTo").focus(),60); }
+      else if(a==="request"){ openSheet("requestPanel"); setTimeout(()=>$("reqFrom").focus(),60); }
+      else if(a==="hideSend") closeSheets();
+      else if(a==="hideRequest") closeSheets();
       else if(a==="copyReq"){ if(window._reqLink){ navigator.clipboard&&navigator.clipboard.writeText(window._reqLink); toast("Request link copied."); } }
       else if(a==="goCardlink"){ go("move"); $("cardlinkWrap").hidden=false; }
       else if(a==="goIssued"){ go("card"); const box=$("issuedBox"), ic=$("d-issued"); ic.hidden=false; box.innerHTML=""; box.appendChild(ic); if(!state.card) toast("Add an issued-card ID in Developer to load real details."); }
@@ -614,7 +625,7 @@
     state.balanceCents-=amt; renderBalance();
     prependActivity("To "+to, -amt, ($("sendNote").value.trim()||"Sent")+" · just now");
     toast("Sent "+fmtMoney(amt)+" to "+to+".");
-    $("sendTo").value=""; $("sendAmt").value=""; $("sendNote").value=""; $("sendPanel").hidden=true; go("home");
+    $("sendTo").value=""; $("sendAmt").value=""; $("sendNote").value=""; closeSheets(); go("home");
   });
 
   $("reqBtn").addEventListener("click",()=>{

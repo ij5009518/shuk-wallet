@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shuk — your money, your card, your bank</title>
+<meta name="description" content="Shuk is a modern wallet: balance, issued cards, bank accounts, and instant send & request — built on Moov's licensed rails." />
+<style>
+  :root{
+    --bg:#0b0e1a; --ink:#0b0e16; --muted:#5b5d6a; --faint:#9294a0; --line:#e7e7f1;
+    --surface:#f6f7fb; --accent:#4a5cf5; --accent2:#3d50ec; --ok:#16a34a; --okbg:#e9f7ef;
+    --card1:#171a2b; --card2:#2b2f52;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,Helvetica,Arial,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;background:#fff;}
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px;}
+  .mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),#7b88ff);display:grid;place-items:center;color:#fff;font-weight:800;font-size:16px;flex:none;}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:12px;padding:13px 22px;font-weight:700;font-size:15px;}
+  .btn.pri{background:var(--accent);color:#fff;}
+  .btn.pri:hover{background:var(--accent2);}
+  .btn.ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25);}
+  .btn.ghost:hover{background:rgba(255,255,255,.18);}
+  .btn.light{background:#fff;color:var(--ink);border:1px solid var(--line);}
+  .btn.light:hover{background:var(--surface);}
+
+  /* ---- Nav ---- */
+  header.nav{position:absolute;top:0;left:0;right:0;z-index:5;}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;padding-top:22px;padding-bottom:22px;}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:21px;letter-spacing:-.4px;color:#fff;}
+  .navlinks{display:flex;align-items:center;gap:28px;}
+  .navlinks a{color:rgba(255,255,255,.8);font-size:14.5px;font-weight:600;}
+  .navlinks a:hover{color:#fff;}
+
+  /* ---- Hero ---- */
+  .hero{background:radial-gradient(120% 130% at 82% -10%,#2b3168 0%,#171b39 48%,#0b0e1a 100%);color:#fff;padding:150px 0 90px;overflow:hidden;position:relative;}
+  .hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:rgba(122,136,255,.16);border:1px solid rgba(122,136,255,.3);color:#c7ccff;font-size:12.5px;font-weight:700;padding:6px 13px;border-radius:30px;margin-bottom:22px;}
+  .hero h1{font-size:54px;line-height:1.05;letter-spacing:-1.6px;font-weight:850;margin:0 0 18px;}
+  .hero h1 .g{background:linear-gradient(120deg,#8f9bff,#6ad0ff);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero p.sub{font-size:18px;line-height:1.6;color:rgba(255,255,255,.78);margin:0 0 30px;max-width:520px;}
+  .cta-row{display:flex;gap:13px;flex-wrap:wrap;}
+  .trust{margin-top:30px;font-size:12.5px;color:rgba(255,255,255,.6);display:flex;gap:18px;flex-wrap:wrap;}
+  .trust b{color:rgba(255,255,255,.9);}
+
+  /* ---- Phone/card mock ---- */
+  .mock{position:relative;display:flex;justify-content:center;}
+  .ccard{width:380px;max-width:100%;border-radius:22px;padding:26px;color:#fff;background:radial-gradient(130% 130% at 100% 0%,#34406e 0%,#2b2f52 40%,#171a2b 100%);box-shadow:0 30px 70px -28px rgba(0,0,0,.7);transform:rotate(-3deg);}
+  .ccard .r1{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;letter-spacing:.3px;}
+  .ccard .lbl{margin-top:26px;font-size:12px;opacity:.7;}
+  .ccard .bal{font-size:38px;font-weight:850;letter-spacing:-1px;margin-top:3px;}
+  .ccard .num{margin-top:26px;letter-spacing:3px;font-size:15px;opacity:.85;}
+  .ccard .r3{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;opacity:.65;letter-spacing:.6px;}
+  .chip{position:absolute;background:#fff;color:var(--ink);border-radius:15px;padding:13px 16px;box-shadow:0 18px 40px -16px rgba(0,0,0,.5);font-weight:700;font-size:13px;display:flex;align-items:center;gap:9px;}
+  .chip .dot{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--okbg);color:var(--ok);}
+  .chip.c1{top:6px;left:-6px;}
+  .chip.c2{bottom:14px;right:-10px;}
+  .chip small{display:block;color:var(--muted);font-weight:600;font-size:11px;}
+
+  /* ---- Logos / trust strip ---- */
+  .strip{background:#fff;border-bottom:1px solid var(--line);}
+  .strip .wrap{display:flex;align-items:center;justify-content:center;gap:14px;padding:18px 28px;flex-wrap:wrap;color:var(--muted);font-size:13.5px;font-weight:600;}
+  .strip b{color:var(--ink);}
+
+  /* ---- Features ---- */
+  section.feat{padding:84px 0;}
+  .h2{font-size:34px;font-weight:850;letter-spacing:-.8px;text-align:center;margin:0 0 10px;}
+  .lead{text-align:center;color:var(--muted);font-size:16.5px;max-width:560px;margin:0 auto 48px;line-height:1.6;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .fcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px;}
+  .fcard .ic{width:44px;height:44px;border-radius:12px;background:#eef1ff;display:grid;place-items:center;margin-bottom:16px;}
+  .fcard .ic svg{width:22px;height:22px;stroke:var(--accent);}
+  .fcard h3{font-size:17px;font-weight:780;margin:0 0 7px;}
+  .fcard p{font-size:14px;line-height:1.6;color:var(--muted);margin:0;}
+
+  /* ---- Drops band ---- */
+  .band{background:var(--surface);padding:84px 0;}
+  .chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:8px;}
+  .dchip{background:#fff;border:1px solid var(--line);border-radius:30px;padding:11px 18px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:9px;}
+  .dchip .d{width:8px;height:8px;border-radius:50%;background:var(--accent);}
+
+  /* ---- CTA ---- */
+  .final{padding:90px 0;}
+  .finalbox{background:radial-gradient(120% 160% at 85% 0%,#2b3168 0%,#171b39 55%,#0b0e1a 100%);color:#fff;border-radius:26px;padding:64px 40px;text-align:center;}
+  .finalbox h2{font-size:38px;font-weight:850;letter-spacing:-1px;margin:0 0 14px;}
+  .finalbox p{color:rgba(255,255,255,.75);font-size:17px;margin:0 auto 28px;max-width:480px;line-height:1.6;}
+
+  footer{border-top:1px solid var(--line);padding:34px 0;}
+  footer .wrap{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:13px;}
+  footer .brand{color:var(--ink);font-size:18px;}
+  .mark.sm{width:24px;height:24px;font-size:13px;border-radius:7px;}
+
+  @media (max-width:880px){
+    .hero{padding:130px 0 70px;}
+    .hero .wrap{grid-template-columns:1fr;}
+    .hero h1{font-size:40px;}
+    .mock{margin-top:30px;}
+    .grid{grid-template-columns:1fr;}
+    .navlinks a:not(.signin){display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <div class="brand"><span class="mark">S</span><span>Shuk</span></div>
+    <nav class="navlinks">
+      <a href="#features">Features</a>
+      <a href="#drops">Moov Drops</a>
+      <a class="signin" href="/"><span class="btn ghost">Sign in</span></a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="pill">● Powered by Moov · Secured by Clerk</span>
+      <h1>Your money, your card,<br><span class="g">your bank</span> — in one wallet.</h1>
+      <p class="sub">Shuk brings a spending balance, an issued card, a real bank account, and instant send &amp; request together in one clean app — running on Moov’s licensed payment rails.</p>
+      <div class="cta-row">
+        <a href="/"><button class="btn pri">Open Shuk →</button></a>
+        <a href="#drops"><button class="btn ghost">Explore the Drops</button></a>
+      </div>
+      <div class="trust"><span><b>FDIC-insured</b> via partner bank</span><span><b>PCI-compliant</b> card issuing</span><span><b>Bank-grade</b> KYC</span></div>
+    </div>
+    <div class="mock">
+      <div class="ccard">
+        <div class="r1"><span>Shuk · Checking</span><span style="opacity:.65;letter-spacing:2px">VISA</span></div>
+        <div class="lbl">Available balance</div>
+        <div class="bal">$4,820.50</div>
+        <div class="num">•••• &nbsp;•••• &nbsp;•••• &nbsp;7842</div>
+        <div class="r3"><span>ISAAC JOSEPH</span><span>09 / 29</span></div>
+      </div>
+      <div class="chip c1"><span class="dot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span><div>+$1,200.00<small>Deposit · just now</small></div></div>
+      <div class="chip c2"><span class="dot" style="background:#eef1ff;color:#4a5cf5"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5cf5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span><div>Sent to Sarah<small>$25.50 · instant</small></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="strip"><div class="wrap"><span>Real banking infrastructure:</span> <b>Moov</b> money movement · <b>Clerk</b> authentication · <b>FDIC</b> partner bank · <b>Visa</b> card issuing</div></div>
+
+<!-- FEATURES -->
+<section class="feat" id="features">
+  <div class="wrap">
+    <h2 class="h2">Everything a modern wallet needs</h2>
+    <p class="lead">One account that holds your money, spends from a card, connects to your bank, and moves money to anyone — without you ever holding a money-transmitter license.</p>
+    <div class="grid">
+      <div class="fcard"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="3"/><path d="M2 10h20M16 15h3"/></svg></div><h3>Wallet &amp; balance</h3><p>A real spending balance you can load, hold, and pay from instantly.</p></div>
+      <div class="fcard"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg></div><h3>Issued cards</h3><p>A Moov-issued Visa card with PCI-protected details, freeze, and wallet pay.</p></div>
+      <div class="fcard"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg></div><h3>Bank accounts</h3><p>Account &amp; routing numbers, linked external banks, and ACH transfers.</p></div>
+      <div class="fcard"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10l-4 4 4 4M3 14h12M17 14l4-4-4-4M21 10H9"/></svg></div><h3>Send &amp; request</h3><p>Move money to a person or generate a shareable request link in seconds.</p></div>
+      <div class="fcard"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><h3>Fast onboarding</h3><p>Bank-grade identity verification (KYC) built right into the flow.</p></div>
+      <div class="fcard"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><h3>All Moov Drops</h3><p>Onboarding, payment methods, card link, issued card, file upload &amp; terms — embedded.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- DROPS BAND -->
+<section class="band" id="drops">
+  <div class="wrap">
+    <h2 class="h2">Built on real Moov Drops</h2>
+    <p class="lead">Shuk embeds Moov’s pre-built, secure UI components — themed to match — so every sensitive flow is handled by the experts.</p>
+    <div class="chips">
+      <span class="dchip"><span class="d"></span>Onboarding</span>
+      <span class="dchip"><span class="d"></span>Payment methods</span>
+      <span class="dchip"><span class="d"></span>Card link</span>
+      <span class="dchip"><span class="d"></span>Issued card</span>
+      <span class="dchip"><span class="d"></span>File upload</span>
+      <span class="dchip"><span class="d"></span>Terms of service</span>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final">
+  <div class="wrap">
+    <div class="finalbox">
+      <h2>Open your Shuk wallet</h2>
+      <p>Sign in with Google or email and explore the full wallet — balance, card, bank, send &amp; request, and every Moov Drop.</p>
+      <a href="/"><button class="btn pri">Open Shuk →</button></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="brand"><span class="mark sm">S</span><span>Shuk</span></div>
+    <span>Demo wallet on Moov sandbox · Money movement by Moov Financial · Auth by Clerk</span>
+    <a href="/"><span style="color:var(--accent);font-weight:700;">Open the app →</span></a>
+  </div>
+</footer>
+
+</body>
+</html>
